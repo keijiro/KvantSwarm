@@ -17,7 +17,7 @@ RenderSettings:
   m_Fog: 1
   m_FogColor: {r: .0924524069, g: .097743392, b: .110294104, a: 1}
   m_FogMode: 3
-  m_FogDensity: .200000003
+  m_FogDensity: .300000012
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
   m_AmbientSkyColor: {r: .211999997, g: .226999998, b: .259000003, a: 1}
@@ -87,6 +87,63 @@ NavMeshSettings:
     cellSize: .166666672
     manualCellSize: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &242242889
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 242242891}
+  - 114: {fileID: 242242890}
+  m_Layer: 0
+  m_Name: Swarm (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &242242890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 242242889}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35cbd57b5b84b46d4bcaeafa15a5f7e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maxParticles: 1000
+  _maxHistory: 64
+  _attractorPosition: {x: 0, y: 0, z: 0}
+  _spread: .0199999996
+  _minAcceleration: 1
+  _maxAcceleration: 3
+  _damp: .600000024
+  _noiseAmplitude: 2
+  _noiseFrequency: .200000003
+  _noiseSpeed: .300000012
+  _noiseVariance: 1
+  _flow: {x: -2, y: 0, z: 0}
+  _color1: {r: .960953355, g: 1, b: .595588207, a: 1}
+  _color2: {r: .415549308, g: .863045871, b: .926470578, a: 1}
+  _gradientSteepness: 2
+  _randomSeed: 20
+  _kernelShader: {fileID: 4800000, guid: ab176efa7135a4f038c7b318a0b3c9ef, type: 3}
+  _lineShader: {fileID: 4800000, guid: 8c8221b0c66b749e38892c32d2f99546, type: 3}
+--- !u!4 &242242891
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 242242889}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 2
 --- !u!1 &741847406
 GameObject:
   m_ObjectHideFlags: 0
@@ -171,7 +228,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 741847406}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -2}
+  m_LocalPosition: {x: 0, y: 0, z: -3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 954057700}
@@ -341,7 +398,7 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 954057699}
-  m_LocalRotation: {x: 0, y: .258819073, z: 0, w: .965925813}
+  m_LocalRotation: {x: 0, y: .173648223, z: 0, w: .984807789}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -397,18 +454,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35cbd57b5b84b46d4bcaeafa15a5f7e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _maxParticles: 400
+  _maxParticles: 1000
   _maxHistory: 64
   _attractorPosition: {x: 0, y: 0, z: 0}
+  _spread: .0199999996
   _minAcceleration: 1
-  _maxAcceleration: 2.55999994
-  _drag: .00600000005
+  _maxAcceleration: 3
+  _damp: .600000024
   _noiseAmplitude: 2
-  _noiseFrequency: .150000006
-  _noiseSpeed: 2
+  _noiseFrequency: .200000003
+  _noiseSpeed: .300000012
+  _noiseVariance: 1
+  _flow: {x: -2, y: 0, z: 0}
   _color1: {r: .960953355, g: 1, b: .595588207, a: 1}
   _color2: {r: .415549308, g: .863045871, b: .926470578, a: 1}
-  _colorExponent: 2
+  _gradientSteepness: 2
   _randomSeed: 0
   _kernelShader: {fileID: 4800000, guid: ab176efa7135a4f038c7b318a0b3c9ef, type: 3}
   _lineShader: {fileID: 4800000, guid: 8c8221b0c66b749e38892c32d2f99546, type: 3}

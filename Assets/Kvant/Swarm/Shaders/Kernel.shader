@@ -20,9 +20,12 @@ Shader "Hidden/Kvant/Swarm/Kernel"
     float4 _VelocityTex_TexelSize;
 
     float3 _AttractPos;
-    float3 _Acceleration;
-    float3 _NoiseParams; // (frequency, amplitude, animation)
+    float2 _Acceleration; // (min, max)
+    float _Spread;
+    float _Damp;
+    float4 _NoiseParams; // (frequency, amplitude, animation, variance)
     float _RandomSeed;
+    float3 _Flow;
 
     // Pseudo random number generator
     float nrand(float2 uv, float salt)
@@ -31,14 +34,22 @@ Shader "Hidden/Kvant/Swarm/Kernel"
         return frac(sin(dot(uv, float2(12.9898, 78.233))) * 43758.5453);
     }
 
-    // Position dependant velocity field
-    float3 position_velocity(float3 p, float2 uv)
+    // Position dependant force field
+    float3 position_force(float3 p, float2 uv)
     {
-        p = (p + _Time.y * _NoiseParams.z) * _NoiseParams.x;
-        float nx = cnoise(p + float3(138.2, uv.x, uv.y));
-        float ny = cnoise(p + float3(uv.y, 138.2, uv.x));
-        float nz = cnoise(p + float3(uv.x, uv.y, 138.2));
+        p = p * _NoiseParams.x + _Time.y * _NoiseParams.z;
+        float3 uvc = float3(uv, 7.919) * _NoiseParams.w;
+        float nx = cnoise(p + uvc.xyz);
+        float ny = cnoise(p + uvc.yzx);
+        float nz = cnoise(p + uvc.zxy);
         return float3(nx, ny, nz) * _NoiseParams.y;
+    }
+
+    // Attractor position
+    float3 attract_point(float2 uv)
+    {
+        float3 r = float3(nrand(uv, 0), nrand(uv, 1), nrand(uv, 2));
+        return _AttractPos + (r - (float3)0.5) * _Spread;
     }
 
     // Pass 0: position initialization
@@ -56,51 +67,47 @@ Shader "Hidden/Kvant/Swarm/Kernel"
     // Pass 2: position update
     float4 frag_update_position(v2f_img i) : SV_Target 
     {
-        if (i.uv.x < _PositionTex_TexelSize.x)
-        {
-            float dt = unity_DeltaTime.x;
+        float dt = unity_DeltaTime.x;
 
-            float3 p = tex2D(_PositionTex, i.uv).xyz;
-            float3 v = tex2D(_VelocityTex, i.uv).xyz;
+        // Fetch the current position (u=0) or the previous position (u>0).
+        float2 uv_prev = float2(_PositionTex_TexelSize.x, 0);
+        float3 p = tex2D(_PositionTex, i.uv - uv_prev).xyz;
 
-            //p.xyz += (v + position_velocity(p.xyz, i.uv)) * dt;
-            p.xyz += v * dt;
+        // Fetch the velocity vector.
+        float3 v = tex2D(_VelocityTex, i.uv).xyz;
 
-            return float4(p, 1);
-        }
-        else
-        {
-            float2 duv = float2(_PositionTex_TexelSize.x, 0);
-            return tex2D(_PositionTex, i.uv - duv) + float4(-2.0/60, 0, 0, 0);
-        }
-    }
+        // Add the velocity (u=0) or the flow vector (u>0).
+        float u_0 = i.uv.x < _PositionTex_TexelSize.x;
+        p += lerp(_Flow, v, u_0) * dt;
 
-    float3 attract_point(float2 uv)
-    {
-        return _AttractPos + float3(nrand(uv, 3), nrand(uv, 4), nrand(uv, 5)) * 0.1;
+        return float4(p, 0);
     }
 
     // Pass 3: velocity update
     float4 frag_update_velocity(v2f_img i) : SV_Target 
     {
-        if (i.uv.x < _VelocityTex_TexelSize.x)
-        {
-            float dt = unity_DeltaTime.x;
+        float dt = unity_DeltaTime.x;
 
-            float3 p = tex2D(_PositionTex, i.uv).xyz;
-            float3 v = tex2D(_VelocityTex, i.uv).xyz;
+        // Only needs the leftmost pixel.
+        float2 uv = i.uv * float2(0, 1);
 
-            float a = lerp(_Acceleration.x, _Acceleration.y, nrand(i.uv, 9));
-            float3 ac = (attract_point(i.uv) - p + position_velocity(p, i.uv)) * a;
-            v = v * (1.0 - _Acceleration.z) + ac * dt;
+        // Fetch the current position/velocity.
+        float3 p = tex2D(_PositionTex, uv).xyz;
+        float3 v = tex2D(_VelocityTex, uv).xyz;
 
-            return float4(v, 0);
-        }
-        else
-        {
-            float2 duv = float2(_VelocityTex_TexelSize.x, 0);
-            return tex2D(_VelocityTex, i.uv - duv);
-        }
+        // Acceleration scale factor
+        float acs = lerp(_Acceleration.x, _Acceleration.y, nrand(uv, 3));
+
+        // Acceleration force
+        float3 acf = attract_point(i.uv) - p + position_force(p, uv);
+
+        // Damping
+        v *= (1.0 - _Damp * dt);
+
+        // Acceleration
+        v += acs * acf * dt;
+
+        return float4(v, 0);
     }
 
     ENDCG

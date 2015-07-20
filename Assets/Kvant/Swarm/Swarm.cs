@@ -20,13 +20,16 @@ namespace Kvant
         Vector3 _attractorPosition = Vector3.zero;
 
         [SerializeField]
+        float _spread = 0.2f;
+
+        [SerializeField]
         float _minAcceleration = 0.5f;
 
         [SerializeField]
         float _maxAcceleration = 1.0f;
 
         [SerializeField]
-        float _drag = 0.05f;
+        float _damp = 0.5f;
 
         [SerializeField]
         float _noiseAmplitude = 0.1f;
@@ -37,6 +40,12 @@ namespace Kvant
         [SerializeField]
         float _noiseSpeed = 1.0f;
 
+        [SerializeField]
+        float _noiseVariance = 1.0f;
+
+        [SerializeField]
+        Vector3 _flow = Vector3.zero;
+
         [SerializeField, ColorUsage(true, true, 0, 8, 0.125f, 3)]
         Color _color1 = Color.white;
 
@@ -44,7 +53,7 @@ namespace Kvant
         Color _color2 = Color.white;
 
         [SerializeField]
-        float _colorExponent = 2.0f;
+        float _gradientSteepness = 2.0f;
 
         [SerializeField]
         int _randomSeed = 0;
@@ -86,13 +95,13 @@ namespace Kvant
             return material;
         }
 
-        RenderTexture CreateBuffer()
+        RenderTexture CreateBuffer(bool forVelocity)
         {
-            var buffer = new RenderTexture(
-                _maxHistory, _maxParticles, 0, RenderTextureFormat.ARGBFloat);
+            var width = forVelocity ? 1 : _maxHistory;
+            var buffer = new RenderTexture(width, _maxParticles, 0, RenderTextureFormat.ARGBFloat);
             buffer.hideFlags = HideFlags.DontSave;
             buffer.filterMode = FilterMode.Point;
-            buffer.wrapMode = TextureWrapMode.Repeat;
+            buffer.wrapMode = TextureWrapMode.Clamp;
             return buffer;
         }
 
@@ -151,8 +160,11 @@ namespace Kvant
         {
             var m = _kernelMaterial;
             m.SetVector("_AttractPos", _attractorPosition);
-            m.SetVector("_Acceleration", new Vector3(_minAcceleration, _maxAcceleration, _drag));
-            m.SetVector("_NoiseParams", new Vector3(_noiseFrequency, _noiseAmplitude, _noiseSpeed));
+            m.SetFloat("_Spread", _spread);
+            m.SetFloat("_Damp", _damp);
+            m.SetVector("_Acceleration", new Vector2(_minAcceleration, _maxAcceleration));
+            m.SetVector("_NoiseParams", new Vector4(_noiseFrequency, _noiseAmplitude, _noiseSpeed, _noiseVariance));
+            m.SetVector("_Flow", _flow);
             m.SetFloat("_RandomSeed", _randomSeed);
             m.SetTexture("_PositionTex", _positionBuffer1);
             m.SetTexture("_VelocityTex", _velocityBuffer1);
@@ -179,10 +191,10 @@ namespace Kvant
             if (_velocityBuffer1) DestroyImmediate(_velocityBuffer1);
             if (_velocityBuffer2) DestroyImmediate(_velocityBuffer2);
 
-            _positionBuffer1 = CreateBuffer();
-            _positionBuffer2 = CreateBuffer();
-            _velocityBuffer1 = CreateBuffer();
-            _velocityBuffer2 = CreateBuffer();
+            _positionBuffer1 = CreateBuffer(false);
+            _positionBuffer2 = CreateBuffer(false);
+            _velocityBuffer1 = CreateBuffer(true);
+            _velocityBuffer2 = CreateBuffer(true);
 
             // shader materials
             if (!_kernelMaterial) _kernelMaterial = CreateMaterial(_kernelShader);
@@ -201,7 +213,7 @@ namespace Kvant
             Graphics.Blit(null, _velocityBuffer2, _kernelMaterial, 1);
 
             // Execute the kernel shader repeatedly.
-            for (var i = 0; i < 8; i++) {
+            for (var i = 0; i < 32; i++) {
                 SwapGpgpuBuffers();
                 UpdateKernelShader();
                 Graphics.Blit(_positionBuffer1, _positionBuffer2, _kernelMaterial, 2);
@@ -251,7 +263,7 @@ namespace Kvant
             _lineMaterial.SetTexture("_VelocityTex", _velocityBuffer2);
             _lineMaterial.SetColor("_Color1", _color1);
             _lineMaterial.SetColor("_Color2", _color2);
-            _lineMaterial.SetFloat("_ColorExp", _colorExponent);
+            _lineMaterial.SetFloat("_GradExp", _gradientSteepness);
             Graphics.DrawMesh(_mesh, transform.localToWorldMatrix, _lineMaterial, 0);
         }
 

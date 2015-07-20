@@ -34,7 +34,7 @@ Shader "Hidden/Kvant/Swarm/Line"
 
     half4 _Color1;
     half4 _Color2;
-    half _ColorExp;
+    half _GradExp;
 
     // Pseudo random number generator
     float nrand(float2 uv, float salt)
@@ -53,7 +53,7 @@ Shader "Hidden/Kvant/Swarm/Line"
         o.position = mul(UNITY_MATRIX_MVP, p);
 
         float4 c = lerp(_Color1, _Color2, nrand(uv.yy, 10));
-        c.a *= pow(1.0 - uv.x, _ColorExp);
+        c.a *= pow(1.0 - uv.x, _GradExp);
         o.color = c;
 
         UNITY_TRANSFER_FOG(o, o.position);
