@@ -8,74 +8,167 @@ namespace Kvant
     [ExecuteInEditMode, AddComponentMenu("Kvant/Swarm")]
     public class Swarm : MonoBehaviour
     {
-        #region Parameters Exposed To Editor
+        #region Basic Configuration
 
         [SerializeField]
         int _lineCount = 32;
 
+        public int TotalLineCount {
+            get { return _lineCount - _lineCount % DrawCount; }
+        }
+
         [SerializeField]
         int _historyLength = 32;
 
-        [SerializeField]
-        Vector3 _attractorPosition = Vector3.zero;
+        #endregion
 
-        [SerializeField]
-        float _spread = 0.2f;
+        #region Dynamics Parameters
 
         [SerializeField]
         float _minAcceleration = 0.5f;
 
+        public float minAcceleration {
+            get { return _minAcceleration; }
+            set { _minAcceleration = value; }
+        }
+
         [SerializeField]
         float _maxAcceleration = 1.0f;
+
+        public float maxAcceleration {
+            get { return _maxAcceleration; }
+            set { _maxAcceleration = value; }
+        }
 
         [SerializeField]
         float _damp = 0.5f;
 
+        public float damp {
+            get { return _damp; }
+            set { _damp = value; }
+        }
+
+        #endregion
+
+        #region External Forces
+
+        [SerializeField]
+        Vector3 _attractor = Vector3.zero;
+
+        public Vector3 attractor {
+            get { return _attractor; }
+            set { _attractor = value; }
+        }
+
+        [SerializeField]
+        float _spread = 0.2f;
+
+        public float spread {
+            get { return _spread; }
+            set { _spread = value; }
+        }
+
+        [SerializeField]
+        Vector3 _flow = Vector3.zero;
+
+        public Vector3 flow {
+            get { return _flow; }
+            set { _flow = value; }
+        }
+
+        #endregion
+
+        #region Noise Parameters
+
         [SerializeField]
         float _noiseAmplitude = 0.1f;
+
+        public float noiseAmplitude {
+            get { return _noiseAmplitude; }
+            set { _noiseAmplitude = value; }
+        }
 
         [SerializeField]
         float _noiseFrequency = 0.2f;
 
+        public float noiseFrequency {
+            get { return _noiseFrequency; }
+            set { _noiseFrequency = value; }
+        }
+
         [SerializeField]
         float _noiseSpeed = 1.0f;
+
+        public float noiseSpeed {
+            get { return _noiseSpeed; }
+            set { _noiseSpeed = value; }
+        }
 
         [SerializeField]
         float _noiseVariance = 1.0f;
 
-        [SerializeField]
-        Vector3 _flow = Vector3.zero;
+        public float noiseVariance {
+            get { return _noiseVariance; }
+            set { _noiseVariance = value; }
+        }
+
+        #endregion
+
+        #region Render Settings
 
         public enum ColorMode { Random, Smooth }
 
         [SerializeField]
         ColorMode _colorMode = ColorMode.Random;
 
+        public ColorMode colorMode {
+            get { return _colorMode; }
+            set { _colorMode = value; }
+        }
+
         [SerializeField, ColorUsage(true, true, 0, 8, 0.125f, 3)]
         Color _color1 = Color.white;
+
+        public Color color1 {
+            get { return _color1; }
+            set { _color1 = value; }
+        }
 
         [SerializeField, ColorUsage(true, true, 0, 8, 0.125f, 3)]
         Color _color2 = Color.white;
 
+        public Color color2 {
+            get { return _color2; }
+            set { _color2 = value; }
+        }
+
         [SerializeField]
         float _gradientSteepness = 2.0f;
+
+        public float gradientSteepness {
+            get { return _gradientSteepness; }
+            set { _gradientSteepness = value; }
+        }
+
+        #endregion
+
+        #region Misc Settings
 
         [SerializeField]
         int _randomSeed = 0;
 
         #endregion
 
-        #region Shader And Materials
+        #region Custom Shaders
 
         [SerializeField] Shader _kernelShader;
         [SerializeField] Shader _lineShader;
-
         Material _kernelMaterial;
         Material _lineMaterial;
 
         #endregion
 
-        #region Private Variables And Objects
+        #region Private Objects And Properties
 
         RenderTexture _positionBuffer1;
         RenderTexture _positionBuffer2;
@@ -84,6 +177,7 @@ namespace Kvant
         Mesh _mesh;
         bool _needsReset = true;
 
+        // Returns how many draw calls are needed to draw all lines.
         int DrawCount {
             get {
                 var total = _historyLength * _lineCount;
@@ -92,15 +186,10 @@ namespace Kvant
             }
         }
 
+        // Returns how many lines in one draw call.
         int LinesPerDraw {
             get {
                 return _lineCount / DrawCount;
-            }
-        }
-
-        int TotalLineCount {
-            get {
-                return _lineCount - _lineCount % DrawCount;
             }
         }
 
@@ -185,18 +274,21 @@ namespace Kvant
         void UpdateKernelShader()
         {
             var m = _kernelMaterial;
-            m.SetVector("_AttractPos", _attractorPosition);
-            m.SetFloat("_Spread", _spread);
-            m.SetFloat("_Damp", _damp);
+
             m.SetVector("_Acceleration", new Vector2(_minAcceleration, _maxAcceleration));
-            m.SetVector("_NoiseParams", new Vector4(_noiseFrequency, _noiseAmplitude, _noiseSpeed, _noiseVariance));
+            m.SetFloat("_Damp", _damp);
+            m.SetVector("_AttractPos", _attractor);
+            m.SetFloat("_Spread", _spread);
             m.SetVector("_Flow", _flow);
+            m.SetVector("_NoiseParams", new Vector4(_noiseFrequency, _noiseAmplitude, _noiseSpeed, _noiseVariance));
             m.SetFloat("_RandomSeed", _randomSeed);
+            m.SetFloat("_DeltaTime", Application.isPlaying ? Time.smoothDeltaTime : 0.1f);
+
             m.SetTexture("_PositionTex", _positionBuffer1);
             m.SetTexture("_VelocityTex", _velocityBuffer1);
         }
 
-        void SwapGpgpuBuffers()
+        void SwapBuffers()
         {
             var pb = _positionBuffer1;
             var vb = _velocityBuffer1;
@@ -204,6 +296,22 @@ namespace Kvant
             _velocityBuffer1 = _velocityBuffer2;
             _positionBuffer2 = pb;
             _velocityBuffer2 = vb;
+        }
+
+        void UpdateLineShader()
+        {
+            var m = _lineMaterial;
+
+            m.SetTexture("_PositionTex", _positionBuffer2);
+            m.SetTexture("_VelocityTex", _velocityBuffer2);
+            m.SetColor("_Color1", _color1);
+            m.SetColor("_Color2", _color2);
+            m.SetFloat("_GradExp", _gradientSteepness);
+
+            if (_colorMode == ColorMode.Smooth)
+                m.EnableKeyword("COLOR_SMOOTH");
+            else
+                m.DisableKeyword("COLOR_SMOOTH");
         }
 
         void ResetResources()
@@ -226,25 +334,11 @@ namespace Kvant
             if (!_kernelMaterial) _kernelMaterial = CreateMaterial(_kernelShader);
             if (!_lineMaterial)   _lineMaterial   = CreateMaterial(_lineShader);
 
-            // warming up
-            UpdateKernelShader();
-            InitializeAndPrewarmBuffers();
-
-            _needsReset = false;
-        }
-
-        void InitializeAndPrewarmBuffers()
-        {
+            // buffer initialization
             Graphics.Blit(null, _positionBuffer2, _kernelMaterial, 0);
             Graphics.Blit(null, _velocityBuffer2, _kernelMaterial, 1);
 
-            // Execute the kernel shader repeatedly.
-            for (var i = 0; i < 32; i++) {
-                SwapGpgpuBuffers();
-                UpdateKernelShader();
-                Graphics.Blit(_positionBuffer1, _positionBuffer2, _kernelMaterial, 2);
-                Graphics.Blit(_velocityBuffer1, _velocityBuffer2, _kernelMaterial, 3);
-            }
+            _needsReset = false;
         }
 
         #endregion
@@ -274,27 +368,26 @@ namespace Kvant
             if (Application.isPlaying)
             {
                 // Execute the kernel shaders.
-                SwapGpgpuBuffers();
+                SwapBuffers();
                 UpdateKernelShader();
                 Graphics.Blit(_positionBuffer1, _positionBuffer2, _kernelMaterial, 2);
                 Graphics.Blit(_velocityBuffer1, _velocityBuffer2, _kernelMaterial, 3);
             }
             else
             {
-                InitializeAndPrewarmBuffers();
+                // Reset and execute the kernel shaders repeatedly.
+                Graphics.Blit(null, _positionBuffer2, _kernelMaterial, 0);
+                Graphics.Blit(null, _velocityBuffer2, _kernelMaterial, 1);
+                for (var i = 0; i < 32; i++) {
+                    SwapBuffers();
+                    UpdateKernelShader();
+                    Graphics.Blit(_positionBuffer1, _positionBuffer2, _kernelMaterial, 2);
+                    Graphics.Blit(_velocityBuffer1, _velocityBuffer2, _kernelMaterial, 3);
+                }
             }
 
             // Draw lines.
-            _lineMaterial.SetTexture("_PositionTex", _positionBuffer2);
-            _lineMaterial.SetTexture("_VelocityTex", _velocityBuffer2);
-            _lineMaterial.SetColor("_Color1", _color1);
-            _lineMaterial.SetColor("_Color2", _color2);
-            _lineMaterial.SetFloat("_GradExp", _gradientSteepness);
-
-            if (_colorMode == ColorMode.Smooth)
-                _lineMaterial.EnableKeyword("COLOR_SMOOTH");
-            else
-                _lineMaterial.DisableKeyword("COLOR_SMOOTH");
+            UpdateLineShader();
 
             var matrix = transform.localToWorldMatrix;
             var stride = LinesPerDraw;

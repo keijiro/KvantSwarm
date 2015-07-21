@@ -34,6 +34,7 @@ Shader "Hidden/Kvant/Swarm/Kernel"
     float4 _NoiseParams; // (frequency, amplitude, animation, variance)
     float _RandomSeed;
     float3 _Flow;
+    float _DeltaTime;
 
     // Pseudo random number generator
     float nrand(float2 uv, float salt)
@@ -75,8 +76,6 @@ Shader "Hidden/Kvant/Swarm/Kernel"
     // Pass 2: position update
     float4 frag_update_position(v2f_img i) : SV_Target 
     {
-        float dt = unity_DeltaTime.x;
-
         // Fetch the current position (u=0) or the previous position (u>0).
         float2 uv_prev = float2(_PositionTex_TexelSize.x, 0);
         float4 p = tex2D(_PositionTex, i.uv - uv_prev);
@@ -86,7 +85,7 @@ Shader "Hidden/Kvant/Swarm/Kernel"
 
         // Add the velocity (u=0) or the flow vector (u>0).
         float u_0 = i.uv.x < _PositionTex_TexelSize.x;
-        p.xyz += lerp(_Flow, v, u_0) * dt;
+        p.xyz += lerp(_Flow, v, u_0) * _DeltaTime;
 
         return p;
     }
@@ -94,8 +93,6 @@ Shader "Hidden/Kvant/Swarm/Kernel"
     // Pass 3: velocity update
     float4 frag_update_velocity(v2f_img i) : SV_Target 
     {
-        float dt = unity_DeltaTime.x;
-
         // Only needs the leftmost pixel.
         float2 uv = i.uv * float2(0, 1);
 
@@ -110,10 +107,10 @@ Shader "Hidden/Kvant/Swarm/Kernel"
         float3 acf = attract_point(i.uv) - p + position_force(p, uv);
 
         // Damping
-        v *= (1.0 - _Damp * dt);
+        v *= (1.0 - _Damp * _DeltaTime);
 
         // Acceleration
-        v += acs * acf * dt;
+        v += acs * acf * _DeltaTime;
 
         return float4(v, 0);
     }

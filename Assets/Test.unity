@@ -419,16 +419,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _lineCount: 4096
   _historyLength: 128
-  _attractorPosition: {x: 0, y: 0, z: 0}
-  _spread: 0
   _minAcceleration: 1
   _maxAcceleration: 3
   _damp: .600000024
+  _attractor: {x: 0, y: 0, z: 0}
+  _spread: 0
+  _flow: {x: -2, y: 0, z: 0}
   _noiseAmplitude: 2
   _noiseFrequency: .219999999
   _noiseSpeed: .300000012
   _noiseVariance: 1
-  _flow: {x: -2, y: 0, z: 0}
   _colorMode: 1
   _color1: {r: .960953355, g: 1, b: .595588207, a: .370000005}
   _color2: {r: .415549308, g: .863045871, b: .926470578, a: .370000005}
