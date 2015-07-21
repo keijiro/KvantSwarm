@@ -1,6 +1,11 @@
 ﻿//
 // Line shader for Swarm
 //
+// Texture format:
+//
+// _PositionTex.xyz = position
+// _PositionTex.w   = random number
+//
 Shader "Hidden/Kvant/Swarm/Line"
 {
     Properties
@@ -12,6 +17,7 @@ Shader "Hidden/Kvant/Swarm/Line"
 
     CGINCLUDE
 
+    #pragma multi_compile COLOR_RANDOM COLOR_SMOOTH
     #pragma multi_compile_fog
 
     #include "UnityCG.cginc"
@@ -36,23 +42,21 @@ Shader "Hidden/Kvant/Swarm/Line"
     half4 _Color2;
     half _GradExp;
 
-    // Pseudo random number generator
-    float nrand(float2 uv, float salt)
-    {
-        uv += float2(salt, 0);
-        return frac(sin(dot(uv, float2(12.9898, 78.233))) * 43758.5453);
-    }
-
     v2f vert(appdata v)
     {
         v2f o;
 
         float2 uv = v.texcoord.xy + _PositionTex_TexelSize.xy / 2;
+        float4 p = tex2Dlod(_PositionTex, float4(uv, 0, 0));
 
-        float4 p = v.position + tex2Dlod(_PositionTex, float4(uv, 0, 0));
-        o.position = mul(UNITY_MATRIX_MVP, p);
+        float3 vp = v.position.xyz + p.xyz;
+        o.position = mul(UNITY_MATRIX_MVP, float4(vp, 1));
 
-        float4 c = lerp(_Color1, _Color2, nrand(uv.yy, 10));
+#if COLOR_RANDOM
+        float4 c = lerp(_Color1, _Color2, p.w);
+#else
+        float4 c = lerp(_Color1, _Color2, uv.y);
+#endif
         c.a *= pow(1.0 - uv.x, _GradExp);
         o.color = c;
 

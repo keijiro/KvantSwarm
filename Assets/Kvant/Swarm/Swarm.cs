@@ -46,6 +46,11 @@ namespace Kvant
         [SerializeField]
         Vector3 _flow = Vector3.zero;
 
+        public enum ColorMode { Random, Smooth }
+
+        [SerializeField]
+        ColorMode _colorMode = ColorMode.Random;
+
         [SerializeField, ColorUsage(true, true, 0, 8, 0.125f, 3)]
         Color _color1 = Color.white;
 
@@ -264,6 +269,10 @@ namespace Kvant
             _lineMaterial.SetColor("_Color1", _color1);
             _lineMaterial.SetColor("_Color2", _color2);
             _lineMaterial.SetFloat("_GradExp", _gradientSteepness);
+            if (_colorMode == ColorMode.Smooth)
+                _lineMaterial.EnableKeyword("COLOR_SMOOTH");
+            else
+                _lineMaterial.DisableKeyword("COLOR_SMOOTH");
             Graphics.DrawMesh(_mesh, transform.localToWorldMatrix, _lineMaterial, 0);
         }
 

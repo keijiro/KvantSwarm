@@ -1,6 +1,14 @@
 //
 // GPGPU kernels for Swarm
 //
+// Texture format:
+//
+// _PositionTex.xyz = position
+// _PositionTex.w   = random number
+//
+// _VelocityTex.xyz = velocity vector
+// _VelocityTex.w   = 0
+//
 Shader "Hidden/Kvant/Swarm/Kernel"
 {
     Properties
@@ -55,7 +63,7 @@ Shader "Hidden/Kvant/Swarm/Kernel"
     // Pass 0: position initialization
     float4 frag_init_position(v2f_img i) : SV_Target 
     {
-        return (float4)0;
+        return float4(0, 0, 0, nrand(i.uv.yy, 3));
     }
 
     // Pass 1: velocity initialization
@@ -71,16 +79,16 @@ Shader "Hidden/Kvant/Swarm/Kernel"
 
         // Fetch the current position (u=0) or the previous position (u>0).
         float2 uv_prev = float2(_PositionTex_TexelSize.x, 0);
-        float3 p = tex2D(_PositionTex, i.uv - uv_prev).xyz;
+        float4 p = tex2D(_PositionTex, i.uv - uv_prev);
 
         // Fetch the velocity vector.
         float3 v = tex2D(_VelocityTex, i.uv).xyz;
 
         // Add the velocity (u=0) or the flow vector (u>0).
         float u_0 = i.uv.x < _PositionTex_TexelSize.x;
-        p += lerp(_Flow, v, u_0) * dt;
+        p.xyz += lerp(_Flow, v, u_0) * dt;
 
-        return float4(p, 0);
+        return p;
     }
 
     // Pass 3: velocity update
@@ -96,7 +104,7 @@ Shader "Hidden/Kvant/Swarm/Kernel"
         float3 v = tex2D(_VelocityTex, uv).xyz;
 
         // Acceleration scale factor
-        float acs = lerp(_Acceleration.x, _Acceleration.y, nrand(uv, 3));
+        float acs = lerp(_Acceleration.x, _Acceleration.y, nrand(uv, 4));
 
         // Acceleration force
         float3 acf = attract_point(i.uv) - p + position_force(p, uv);
