@@ -38,6 +38,8 @@ Shader "Hidden/Kvant/Swarm/Line"
     sampler2D _PositionTex;
     float4 _PositionTex_TexelSize;
 
+    float2 _BufferOffset;
+
     half4 _Color1;
     half4 _Color2;
     half _GradExp;
@@ -46,7 +48,7 @@ Shader "Hidden/Kvant/Swarm/Line"
     {
         v2f o;
 
-        float2 uv = v.texcoord.xy + _PositionTex_TexelSize.xy / 2;
+        float2 uv = v.texcoord.xy + _BufferOffset;
         float4 p = tex2Dlod(_PositionTex, float4(uv, 0, 0));
 
         float3 vp = v.position.xyz + p.xyz;

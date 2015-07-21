@@ -11,10 +11,10 @@ namespace Kvant
         #region Parameters Exposed To Editor
 
         [SerializeField]
-        int _maxParticles = 32;
+        int _lineCount = 32;
 
         [SerializeField]
-        int _maxHistory = 32;
+        int _historyLength = 32;
 
         [SerializeField]
         Vector3 _attractorPosition = Vector3.zero;
@@ -84,6 +84,26 @@ namespace Kvant
         Mesh _mesh;
         bool _needsReset = true;
 
+        int DrawCount {
+            get {
+                var total = _historyLength * _lineCount;
+                if (total < 65000) return _lineCount;
+                return total / 65000 + 1;
+            }
+        }
+
+        int LinesPerDraw {
+            get {
+                return _lineCount / DrawCount;
+            }
+        }
+
+        int TotalLineCount {
+            get {
+                return _lineCount - _lineCount % DrawCount;
+            }
+        }
+
         #endregion
 
         #region Resource Management
@@ -102,8 +122,9 @@ namespace Kvant
 
         RenderTexture CreateBuffer(bool forVelocity)
         {
-            var width = forVelocity ? 1 : _maxHistory;
-            var buffer = new RenderTexture(width, _maxParticles, 0, RenderTextureFormat.ARGBFloat);
+            var format = RenderTextureFormat.ARGBFloat;
+            var width = forVelocity ? 1 : _historyLength;
+            var buffer = new RenderTexture(width, TotalLineCount, 0, format);
             buffer.hideFlags = HideFlags.DontSave;
             buffer.filterMode = FilterMode.Point;
             buffer.wrapMode = TextureWrapMode.Clamp;
@@ -112,11 +133,11 @@ namespace Kvant
 
         Mesh CreateMesh()
         {
-            var nx = _maxHistory;
-            var ny = _maxParticles;
+            var nx = _historyLength;
+            var ny = LinesPerDraw;
 
             var inx = 1.0f / nx;
-            var iny = 1.0f / ny;
+            var iny = 1.0f / TotalLineCount;
 
             // vertex and texcoord array
             var va = new Vector3[nx * ny];
@@ -269,11 +290,25 @@ namespace Kvant
             _lineMaterial.SetColor("_Color1", _color1);
             _lineMaterial.SetColor("_Color2", _color2);
             _lineMaterial.SetFloat("_GradExp", _gradientSteepness);
+
             if (_colorMode == ColorMode.Smooth)
                 _lineMaterial.EnableKeyword("COLOR_SMOOTH");
             else
                 _lineMaterial.DisableKeyword("COLOR_SMOOTH");
-            Graphics.DrawMesh(_mesh, transform.localToWorldMatrix, _lineMaterial, 0);
+
+            var matrix = transform.localToWorldMatrix;
+            var stride = LinesPerDraw;
+            var total = TotalLineCount;
+
+            var props = new MaterialPropertyBlock();
+            var uv = new Vector2(0.5f / _historyLength, 0);
+
+            for (var i = 0; i < total; i += stride)
+            {
+                uv.y = (0.5f + i) / total;
+                props.SetVector("_BufferOffset", uv);
+                Graphics.DrawMesh(_mesh, matrix, _lineMaterial, 0, null, 0, props);
+            }
         }
 
         #endregion
