@@ -1,5 +1,5 @@
 ﻿//
-// Swarm - gleaming trail lines
+// Swarm - flowing lines animation
 //
 using UnityEngine;
 
@@ -316,8 +316,13 @@ namespace Kvant
 
         void ResetResources()
         {
+            // parameter sanitization
+            _lineCount = Mathf.Clamp(_lineCount, 1, 8192);
+            _historyLength = Mathf.Clamp(_historyLength, 1, 1024);
+
             // mesh object
-            if (_mesh == null) _mesh = CreateMesh();
+            if (_mesh) DestroyImmediate(_mesh);
+            _mesh = CreateMesh();
 
             // GPGPU buffers
             if (_positionBuffer1) DestroyImmediate(_positionBuffer1);
