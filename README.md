@@ -2,17 +2,16 @@ KvantSwarm
 ==========
 
 KvantSwam is a custom renderer for Unity, which was initially made as a GPU
-accelerated swarm behavior simulation.
+accelerated swarm behavior simulation. Though the initial goal was not met,
+I noticed that its organic and chaotic behavior can be used to make a
+beautiful eye-candy.
 
 ![screenshot](http://41.media.tumblr.com/11c9e90cc322a00b3a07310e698ac0b2/tumblr_nrw65sbPnV1qio469o1_400.png)
 ![screenshot](http://40.media.tumblr.com/1167cd3c10386ff573bff8043b7be6bb/tumblr_nrw65sbPnV1qio469o2_400.png)
 ![screenshot](http://41.media.tumblr.com/462f5a6595ff3148711dd57bcc3cc3bc/tumblr_nrw65sbPnV1qio469o3_400.png)
 ![screenshot](http://41.media.tumblr.com/44a85e56644b01772696cad16755539f/tumblr_nrw65sbPnV1qio469o4_400.png)
 
-[See video on Vimeo](https://vimeo.com/134149333)
-
-Though the initial goal was not met, I noticed that its organic and chaotic
-behavior can be used to make a beautiful eye-candy.
+[See video at Vimeo](https://vimeo.com/134149333)
 
 System Requirements
 -------------------
