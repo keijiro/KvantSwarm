@@ -46,7 +46,7 @@ Shader "Hidden/Kvant/Swarm/Kernel"
     // Position dependant force field
     float3 position_force(float3 p, float2 uv)
     {
-        p = p * _NoiseParams.x + _Time.y * _NoiseParams.z;
+        p = p * _NoiseParams.x + _Time.y * _NoiseParams.z + _RandomSeed;
         float3 uvc = float3(uv, 7.919) * _NoiseParams.w;
         float nx = cnoise(p + uvc.xyz);
         float ny = cnoise(p + uvc.yzx);
