@@ -27,14 +27,14 @@ Shader "Hidden/Kvant/Swarm/Kernel"
     float4 _PositionTex_TexelSize;
     float4 _VelocityTex_TexelSize;
 
-    float3 _AttractPos;
     float2 _Acceleration; // (min, max)
-    float _Spread;
     float _Damp;
+    float3 _AttractPos;
+    float _Spread;
+    float3 _Flow;
     float4 _NoiseParams; // (frequency, amplitude, animation, variance)
     float _RandomSeed;
-    float3 _Flow;
-    float _DeltaTime;
+    float2 _TimeParams; // (current, delta)
 
     // Pseudo random number generator
     float nrand(float2 uv, float salt)
@@ -46,7 +46,7 @@ Shader "Hidden/Kvant/Swarm/Kernel"
     // Position dependant force field
     float3 position_force(float3 p, float2 uv)
     {
-        p = p * _NoiseParams.x + _Time.y * _NoiseParams.z + _RandomSeed;
+        p = p * _NoiseParams.x + _TimeParams.x * _NoiseParams.z + _RandomSeed;
         float3 uvc = float3(uv, 7.919) * _NoiseParams.w;
         float nx = cnoise(p + uvc.xyz);
         float ny = cnoise(p + uvc.yzx);
@@ -85,7 +85,7 @@ Shader "Hidden/Kvant/Swarm/Kernel"
 
         // Add the velocity (u=0) or the flow vector (u>0).
         float u_0 = i.uv.x < _PositionTex_TexelSize.x;
-        p.xyz += lerp(_Flow, v, u_0) * _DeltaTime;
+        p.xyz += lerp(_Flow, v, u_0) * _TimeParams.y;
 
         return p;
     }
@@ -107,10 +107,10 @@ Shader "Hidden/Kvant/Swarm/Kernel"
         float3 acf = attract_point(i.uv) - p + position_force(p, uv);
 
         // Damping
-        v *= (1.0 - _Damp * _DeltaTime);
+        v *= (1.0 - _Damp * _TimeParams.y);
 
         // Acceleration
-        v += acs * acf * _DeltaTime;
+        v += acs * acf * _TimeParams.y;
 
         return float4(v, 0);
     }

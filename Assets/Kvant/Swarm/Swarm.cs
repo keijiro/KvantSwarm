@@ -271,7 +271,7 @@ namespace Kvant
             return mesh;
         }
 
-        void UpdateKernelShader()
+        void UpdateKernelShader(int editorFrame = 0)
         {
             var m = _kernelMaterial;
 
@@ -282,7 +282,11 @@ namespace Kvant
             m.SetVector("_Flow", _flow);
             m.SetVector("_NoiseParams", new Vector4(_noiseFrequency, _noiseAmplitude, _noiseSpeed, _noiseVariance));
             m.SetFloat("_RandomSeed", _randomSeed);
-            m.SetFloat("_DeltaTime", Application.isPlaying ? Time.smoothDeltaTime : 0.1f);
+
+            if (Application.isPlaying)
+                m.SetVector("_TimeParams", new Vector2(Time.time, Time.smoothDeltaTime));
+            else
+                m.SetVector("_TimeParams", new Vector2(0.1f * editorFrame, 0.1f));
 
             m.SetTexture("_PositionTex", _positionBuffer1);
             m.SetTexture("_VelocityTex", _velocityBuffer1);
@@ -385,7 +389,7 @@ namespace Kvant
                 Graphics.Blit(null, _velocityBuffer2, _kernelMaterial, 1);
                 for (var i = 0; i < 32; i++) {
                     SwapBuffers();
-                    UpdateKernelShader();
+                    UpdateKernelShader(i);
                     Graphics.Blit(_positionBuffer1, _positionBuffer2, _kernelMaterial, 2);
                     Graphics.Blit(_velocityBuffer1, _velocityBuffer2, _kernelMaterial, 3);
                 }
