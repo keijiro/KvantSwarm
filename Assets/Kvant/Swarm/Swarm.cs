@@ -287,9 +287,6 @@ namespace Kvant
                 m.SetVector("_TimeParams", new Vector2(Time.time, Time.smoothDeltaTime));
             else
                 m.SetVector("_TimeParams", new Vector2(0.1f * editorFrame, 0.1f));
-
-            m.SetTexture("_PositionTex", _positionBuffer1);
-            m.SetTexture("_VelocityTex", _velocityBuffer1);
         }
 
         void SwapBuffers()
@@ -307,7 +304,7 @@ namespace Kvant
             var m = _lineMaterial;
 
             m.SetTexture("_PositionTex", _positionBuffer2);
-            m.SetTexture("_VelocityTex", _velocityBuffer2);
+
             m.SetColor("_Color1", _color1);
             m.SetColor("_Color2", _color2);
             m.SetFloat("_GradExp", _gradientSteepness);
@@ -344,8 +341,8 @@ namespace Kvant
             if (!_lineMaterial)   _lineMaterial   = CreateMaterial(_lineShader);
 
             // buffer initialization
-            Graphics.Blit(null, _positionBuffer2, _kernelMaterial, 0);
-            Graphics.Blit(null, _velocityBuffer2, _kernelMaterial, 1);
+            Graphics.Blit(null, _velocityBuffer1, _kernelMaterial, 1);
+            Graphics.Blit(null, _positionBuffer1, _kernelMaterial, 0);
 
             _needsReset = false;
         }
@@ -379,19 +376,30 @@ namespace Kvant
                 // Execute the kernel shaders.
                 SwapBuffers();
                 UpdateKernelShader();
-                Graphics.Blit(_positionBuffer1, _positionBuffer2, _kernelMaterial, 2);
-                Graphics.Blit(_velocityBuffer1, _velocityBuffer2, _kernelMaterial, 3);
+
+                _kernelMaterial.SetTexture("_PositionTex", _positionBuffer1);
+                _kernelMaterial.SetTexture("_VelocityTex", _velocityBuffer1);
+                Graphics.Blit(null, _velocityBuffer2, _kernelMaterial, 3);
+
+                _kernelMaterial.SetTexture("_VelocityTex", _velocityBuffer2);
+                Graphics.Blit(null, _positionBuffer2, _kernelMaterial, 2);
             }
             else
             {
                 // Reset and execute the kernel shaders repeatedly.
-                Graphics.Blit(null, _positionBuffer2, _kernelMaterial, 0);
                 Graphics.Blit(null, _velocityBuffer2, _kernelMaterial, 1);
+                Graphics.Blit(null, _positionBuffer2, _kernelMaterial, 0);
+
                 for (var i = 0; i < 32; i++) {
                     SwapBuffers();
                     UpdateKernelShader(i);
-                    Graphics.Blit(_positionBuffer1, _positionBuffer2, _kernelMaterial, 2);
-                    Graphics.Blit(_velocityBuffer1, _velocityBuffer2, _kernelMaterial, 3);
+
+                    _kernelMaterial.SetTexture("_PositionTex", _positionBuffer1);
+                    _kernelMaterial.SetTexture("_VelocityTex", _velocityBuffer1);
+                    Graphics.Blit(null, _velocityBuffer2, _kernelMaterial, 3);
+
+                    _kernelMaterial.SetTexture("_VelocityTex", _velocityBuffer2);
+                    Graphics.Blit(null, _positionBuffer2, _kernelMaterial, 2);
                 }
             }
 
