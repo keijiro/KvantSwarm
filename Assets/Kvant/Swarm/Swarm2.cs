@@ -1,12 +1,13 @@
-﻿//
-// Swarm - flowing lines animation
+//
+// Swarm - flowing line animation
 //
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Kvant
 {
-    [ExecuteInEditMode, AddComponentMenu("Kvant/Swarm")]
-    public class Swarm : MonoBehaviour
+    [ExecuteInEditMode, AddComponentMenu("Kvant/Swarm2")]
+    public class Swarm2 : MonoBehaviour
     {
         #region Basic Configuration
 
@@ -112,6 +113,14 @@ namespace Kvant
 
         #region Render Settings
 
+        [SerializeField]
+        float _lineWidth = 0.1f;
+
+        public float lineWidth {
+            get { return _lineWidth; }
+            set { _lineWidth = value; }
+        }
+
         public enum ColorMode { Random, Smooth }
 
         [SerializeField]
@@ -122,15 +131,15 @@ namespace Kvant
             set { _colorMode = value; }
         }
 
-        [SerializeField, ColorUsage(true, true, 0, 8, 0.125f, 3)]
-        Color _color1 = Color.white;
+        [SerializeField]
+        Color _color = Color.white;
 
-        public Color color1 {
-            get { return _color1; }
-            set { _color1 = value; }
+        public Color color {
+            get { return _color; }
+            set { _color = value; }
         }
 
-        [SerializeField, ColorUsage(true, true, 0, 8, 0.125f, 3)]
+        [SerializeField]
         Color _color2 = Color.white;
 
         public Color color2 {
@@ -138,12 +147,36 @@ namespace Kvant
             set { _color2 = value; }
         }
 
-        [SerializeField]
-        float _gradientSteepness = 2.0f;
+        [SerializeField, Range(0, 1)]
+        float _metallic = 0.5f;
 
-        public float gradientSteepness {
-            get { return _gradientSteepness; }
-            set { _gradientSteepness = value; }
+        public float metallic {
+            get { return _metallic; }
+            set { _metallic = value; }
+        }
+
+        [SerializeField, Range(0, 1)]
+        float _smoothness = 0.5f;
+
+        public float smoothness {
+            get { return _smoothness; }
+            set { _smoothness = value; }
+        }
+
+        [SerializeField]
+        ShadowCastingMode _castShadows;
+
+        public ShadowCastingMode castShadows {
+            get { return _castShadows; }
+            set { _castShadows = value; }
+        }
+
+        [SerializeField]
+        bool _receiveShadows = false;
+
+        public bool receiveShadows {
+            get { return _receiveShadows; }
+            set { _receiveShadows = value; }
         }
 
         #endregion
@@ -176,8 +209,8 @@ namespace Kvant
         // Returns how many draw calls are needed to draw all lines.
         int DrawCount {
             get {
-                var total = _historyLength * _lineCount;
-                if (total < 65000) return _lineCount;
+                var total = _historyLength * _lineCount * 2;
+                if (total < 65000) return 1;
                 return total / 65000 + 1;
             }
         }
@@ -230,31 +263,37 @@ namespace Kvant
             var iny = 1.0f / TotalLineCount;
 
             // vertex and texcoord array
-            var va = new Vector3[nx * ny];
-            var ta = new Vector2[nx * ny];
+            var va = new Vector3[(nx - 2) * ny * 2];
+            var ta = new Vector2[(nx - 2) * ny * 2];
 
             var offs = 0;
             for (var y = 0; y < ny; y++)
             {
                 var v = iny * y;
-                for (var x = 0; x < nx; x++)
+                for (var x = 1; x < nx - 1; x++)
                 {
-                    va[offs] = Vector3.zero;
-                    ta[offs] = new Vector2(inx * x, v);
-                    offs++;
+                    va[offs] = Vector3.right * -0.5f;
+                    va[offs + 1] = Vector3.right * 0.5f;
+                    ta[offs] = ta[offs + 1] = new Vector2(inx * x, v);
+                    offs += 2;
                 }
             }
 
             // index array
-            var ia = new int[ny * (nx - 1) * 2];
+            var ia = new int[ny * (nx - 3) * 6];
             offs = 0;
             for (var y = 0; y < ny; y++)
             {
-                var vi = y * nx;
-                for (var x = 0; x < nx - 1; x++)
+                var vi = y * (nx - 2) * 2;
+                for (var x = 0; x < nx - 3; x++)
                 {
-                    ia[offs++] = vi++;
                     ia[offs++] = vi;
+                    ia[offs++] = vi + 1;
+                    ia[offs++] = vi + 2;
+                    ia[offs++] = vi + 1;
+                    ia[offs++] = vi + 3;
+                    ia[offs++] = vi + 2;
+                    vi += 2;
                 }
             }
 
@@ -263,7 +302,7 @@ namespace Kvant
             mesh.hideFlags = HideFlags.DontSave;
             mesh.vertices = va;
             mesh.uv = ta;
-            mesh.SetIndices(ia, MeshTopology.Lines, 0);
+            mesh.SetIndices(ia, MeshTopology.Triangles, 0);
             mesh.Optimize();
 
             // avoid begin culled
@@ -304,11 +343,14 @@ namespace Kvant
         {
             var m = _lineMaterial;
 
-            m.SetTexture("_PositionTex", _positionBuffer2);
-
-            m.SetColor("_Color1", _color1);
+            m.SetFloat("_LineWidth", _lineWidth);
+            m.SetColor("_Color", _color);
             m.SetColor("_Color2", _color2);
-            m.SetFloat("_GradExp", _gradientSteepness);
+            m.SetFloat("_Metallic", _metallic);
+            m.SetFloat("_Smoothness", _smoothness);
+
+            m.SetTexture("_PositionTex", _positionBuffer2);
+            m.SetTexture("_VelocityTex", _velocityBuffer2);
 
             if (_colorMode == ColorMode.Smooth)
                 m.EnableKeyword("COLOR_SMOOTH");
@@ -342,8 +384,8 @@ namespace Kvant
             if (!_lineMaterial)   _lineMaterial   = CreateMaterial(_lineShader);
 
             // buffer initialization
-            Graphics.Blit(null, _positionBuffer1, _kernelMaterial, 0);
-            Graphics.Blit(null, _velocityBuffer1, _kernelMaterial, 1);
+            Graphics.Blit(null, _positionBuffer2, _kernelMaterial, 0);
+            Graphics.Blit(null, _velocityBuffer2, _kernelMaterial, 1);
 
             _needsReset = false;
         }
@@ -418,7 +460,9 @@ namespace Kvant
             {
                 uv.y = (0.5f + i) / total;
                 props.SetVector("_BufferOffset", uv);
-                Graphics.DrawMesh(_mesh, matrix, _lineMaterial, 0, null, 0, props);
+                Graphics.DrawMesh(
+                    _mesh, matrix, _lineMaterial, 0, null, 0, props,
+                    _castShadows, _receiveShadows);
             }
         }
 
