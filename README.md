@@ -6,12 +6,15 @@ accelerated swarm behavior simulation. Though the initial goal was not met,
 I noticed that its organic and chaotic behavior can be used to make a
 beautiful eye-candy.
 
+![screenshot](https://40.media.tumblr.com/bb322993f5302cadbbcc592814084c3b/tumblr_ns5l0dhXeS1qio469o1_400.png)
+![gif](http://33.media.tumblr.com/8ff4a0660a1eaaba3c3bae185f8aa6fb/tumblr_ns5knxUlUL1qio469o1_400.gif)
+
 ![screenshot](http://41.media.tumblr.com/11c9e90cc322a00b3a07310e698ac0b2/tumblr_nrw65sbPnV1qio469o1_400.png)
 ![screenshot](http://40.media.tumblr.com/1167cd3c10386ff573bff8043b7be6bb/tumblr_nrw65sbPnV1qio469o2_400.png)
 ![screenshot](http://41.media.tumblr.com/462f5a6595ff3148711dd57bcc3cc3bc/tumblr_nrw65sbPnV1qio469o3_400.png)
 ![screenshot](http://41.media.tumblr.com/44a85e56644b01772696cad16755539f/tumblr_nrw65sbPnV1qio469o4_400.png)
 
-[See video at Vimeo](https://vimeo.com/134149333)
+[Video (1)](https://vimeo.com/134624419), [Video (2)](https://vimeo.com/134149333)
 
 System Requirements
 -------------------
