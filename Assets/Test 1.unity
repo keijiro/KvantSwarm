@@ -104,6 +104,7 @@ GameObject:
   - 114: {fileID: 741847413}
   - 114: {fileID: 741847414}
   - 114: {fileID: 741847415}
+  - 114: {fileID: 741847417}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -232,7 +233,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mode: 0
   intensity: 4
-  chromaticAberration: 3
+  chromaticAberration: 2.5
   axialAberration: .5
   blur: 0
   blurSpread: .75
@@ -337,6 +338,25 @@ MonoBehaviour:
   _fallOffDistance: 100
   _sampleCount: 2
   _shader: {fileID: 4800000, guid: c928e16c12e994a70928a9181450d18c, type: 3}
+--- !u!114 &741847417
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 741847406}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d637268abbbb5428e991dd9ec93136f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  positionFrequency: .200000003
+  rotationFrequency: .200000003
+  positionAmount: 2
+  rotationAmount: 0
+  positionComponents: {x: 1, y: 1, z: 1}
+  rotationComponents: {x: 1, y: 1, z: 0}
+  positionOctave: 3
+  rotationOctave: 3
 --- !u!1 &814484276
 GameObject:
   m_ObjectHideFlags: 0
@@ -371,15 +391,15 @@ MonoBehaviour:
   _damp: .400000006
   _attractor: {x: 0, y: 0, z: 0}
   _spread: 0
-  _flow: {x: -2, y: 0, z: 0}
-  _noiseAmplitude: 2
+  _flow: {x: -3, y: 0, z: 0}
+  _noiseAmplitude: 2.5
   _noiseFrequency: .219999999
   _noiseSpeed: .300000012
   _noiseVariance: 1
   _lineWidth: .0399999991
   _colorMode: 0
-  _color: {r: 1, g: 0, b: 0, a: 1}
-  _color2: {r: .441176474, g: .441176474, b: .441176474, a: 1}
+  _color1: {r: 1, g: 1, b: 1, a: 1}
+  _color2: {r: .117647052, g: .104671277, b: .104671277, a: 1}
   _metallic: .800000012
   _smoothness: .5
   _castShadows: 1
@@ -407,7 +427,6 @@ GameObject:
   serializedVersion: 4
   m_Component:
   - 4: {fileID: 954057700}
-  - 114: {fileID: 954057701}
   - 114: {fileID: 954057702}
   m_Layer: 0
   m_Name: Pivot
@@ -422,35 +441,13 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 954057699}
-  m_LocalRotation: {x: 0, y: .173648223, z: 0, w: .984807789}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 741847411}
   m_Father: {fileID: 0}
   m_RootOrder: 0
---- !u!114 &954057701
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 954057699}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f91a6fa75d39940268b68c6204273e22, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  position:
-    mode: 0
-    velocity: 1
-    arbitraryVector: {x: 0, y: 1, z: 0}
-    randomness: 0
-  rotation:
-    mode: 2
-    velocity: 18
-    arbitraryVector: {x: 0, y: 1, z: 0}
-    randomness: 0
-  useLocalCoordinate: 1
 --- !u!114 &954057702
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -465,11 +462,11 @@ MonoBehaviour:
   positionFrequency: .200000003
   rotationFrequency: .100000001
   positionAmount: 0
-  rotationAmount: 45
+  rotationAmount: 60
   positionComponents: {x: 1, y: 1, z: 1}
-  rotationComponents: {x: 1, y: 1, z: 1}
+  rotationComponents: {x: 2, y: 1, z: 1}
   positionOctave: 3
-  rotationOctave: 3
+  rotationOctave: 2
 --- !u!1 &1828550056
 GameObject:
   m_ObjectHideFlags: 0
