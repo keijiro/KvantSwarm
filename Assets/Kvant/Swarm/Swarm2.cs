@@ -1,5 +1,5 @@
 //
-// Swarm - flowing line animation
+// Swarm2 - opaque flowing lines animation
 //
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -132,11 +132,11 @@ namespace Kvant
         }
 
         [SerializeField]
-        Color _color = Color.white;
+        Color _color1 = Color.white;
 
         public Color color {
-            get { return _color; }
-            set { _color = value; }
+            get { return _color1; }
+            set { _color1 = value; }
         }
 
         [SerializeField]
@@ -344,7 +344,7 @@ namespace Kvant
             var m = _lineMaterial;
 
             m.SetFloat("_LineWidth", _lineWidth);
-            m.SetColor("_Color", _color);
+            m.SetColor("_Color1", _color1);
             m.SetColor("_Color2", _color2);
             m.SetFloat("_Metallic", _metallic);
             m.SetFloat("_Smoothness", _smoothness);

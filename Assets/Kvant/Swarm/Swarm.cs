@@ -1,5 +1,5 @@
 ﻿//
-// Swarm - flowing lines animation
+// Swarm - transparent flowing lines animation
 //
 using UnityEngine;
 
