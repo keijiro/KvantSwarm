@@ -25,6 +25,9 @@ namespace Kvant
         SerializedProperty _noiseSpeed;
         SerializedProperty _noiseVariance;
 
+        SerializedProperty _swirlStrength;
+        SerializedProperty _swirlDensity;
+
         SerializedProperty _colorMode;
         SerializedProperty _color1;
         SerializedProperty _color2;
@@ -57,6 +60,9 @@ namespace Kvant
             _noiseFrequency = serializedObject.FindProperty("_noiseFrequency");
             _noiseSpeed     = serializedObject.FindProperty("_noiseSpeed");
             _noiseVariance  = serializedObject.FindProperty("_noiseVariance");
+
+            _swirlStrength = serializedObject.FindProperty("_swirlStrength");
+            _swirlDensity  = serializedObject.FindProperty("_swirlDensity");
 
             _colorMode = serializedObject.FindProperty("_colorMode");
             _color1    = serializedObject.FindProperty("_color1");
@@ -101,6 +107,11 @@ namespace Kvant
             EditorGUILayout.Slider(_noiseFrequency, 0.01f, 1.0f, _textFrequency);
             EditorGUILayout.Slider(_noiseSpeed, 0.0f, 5.0f, _textSpeed);
             EditorGUILayout.Slider(_noiseVariance, 0.0f, 10.0f, _textVariance);
+
+            EditorGUILayout.Space();
+
+            EditorGUILayout.Slider(_swirlStrength, 0.0f, 2.0f);
+            EditorGUILayout.Slider(_swirlDensity, 0.01f, 5.0f);
 
             EditorGUILayout.Space();
 

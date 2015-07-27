@@ -19,6 +19,8 @@ Shader "Hidden/Kvant/Swarm/Kernel"
 
     CGINCLUDE
 
+    #pragma multi_compile _ ENABLE_SWIRL
+
     #include "UnityCG.cginc"
     #include "ClassicNoise3D.cginc"
 
@@ -33,6 +35,7 @@ Shader "Hidden/Kvant/Swarm/Kernel"
     float _Spread;
     float3 _Flow;
     float4 _NoiseParams; // (frequency, amplitude, animation, variance)
+    float2 _SwirlParams; // (strength, density)
     float _RandomSeed;
     float2 _TimeParams; // (current, delta)
 
@@ -83,9 +86,14 @@ Shader "Hidden/Kvant/Swarm/Kernel"
         // Fetch the velocity vector.
         float3 v = tex2D(_VelocityTex, i.uv).xyz;
 
+        // Use the flow vector or add swirl vector.
+        float3 flow = _Flow;
+#if ENABLE_SWIRL
+        flow += position_force(p.xyz * _SwirlParams.y, i.uv) * _SwirlParams.x;
+#endif
         // Add the velocity (u=0) or the flow vector (u>0).
         float u_0 = i.uv.x < _PositionTex_TexelSize.x;
-        p.xyz += lerp(_Flow, v, u_0) * _TimeParams.y;
+        p.xyz += lerp(flow, v, u_0) * _TimeParams.y;
 
         return p;
     }

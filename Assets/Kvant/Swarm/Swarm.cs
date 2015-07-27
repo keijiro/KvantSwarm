@@ -108,6 +108,22 @@ namespace Kvant
             set { _noiseVariance = value; }
         }
 
+        [SerializeField]
+        float _swirlStrength = 0.0f;
+
+        public float swirlStrength {
+            get { return _swirlStrength; }
+            set { _swirlStrength = value; }
+        }
+
+        [SerializeField]
+        float _swirlDensity = 1.0f;
+
+        public float swirlDensity {
+            get { return _swirlDensity; }
+            set { _swirlDensity = value; }
+        }
+
         #endregion
 
         #region Render Settings
@@ -297,8 +313,14 @@ namespace Kvant
             m.SetFloat("_Spread", _spread);
             m.SetVector("_Flow", _flow);
             m.SetVector("_NoiseParams", new Vector4(_noiseFrequency, _noiseAmplitude, _noiseSpeed, _noiseVariance));
+            m.SetVector("_SwirlParams", new Vector2(_swirlStrength, _swirlDensity));
             m.SetFloat("_RandomSeed", _randomSeed);
             m.SetVector("_TimeParams", new Vector2(time, deltaTime));
+
+            if (_swirlStrength > 0.0f)
+                m.EnableKeyword("ENABLE_SWIRL");
+            else
+                m.DisableKeyword("ENABLE_SWIRL");
 
             // velocity update
             m.SetTexture("_PositionTex", _positionBuffer1);
