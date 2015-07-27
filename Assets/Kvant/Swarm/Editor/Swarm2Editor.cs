@@ -35,6 +35,8 @@ namespace Kvant
         SerializedProperty _castShadows;
         SerializedProperty _receiveShadows;
 
+        SerializedProperty _fixTimeStep;
+        SerializedProperty _stepsPerSecond;
         SerializedProperty _randomSeed;
 
         static GUIContent _textAcceleration = new GUIContent("Acceleration");
@@ -45,33 +47,35 @@ namespace Kvant
 
         void OnEnable()
         {
-        	_lineCount     = serializedObject.FindProperty("_lineCount");
-        	_historyLength = serializedObject.FindProperty("_historyLength");
+            _lineCount     = serializedObject.FindProperty("_lineCount");
+            _historyLength = serializedObject.FindProperty("_historyLength");
 
-        	_minAcceleration = serializedObject.FindProperty("_minAcceleration");
-        	_maxAcceleration = serializedObject.FindProperty("_maxAcceleration");
-        	_damp            = serializedObject.FindProperty("_damp");
+            _minAcceleration = serializedObject.FindProperty("_minAcceleration");
+            _maxAcceleration = serializedObject.FindProperty("_maxAcceleration");
+            _damp            = serializedObject.FindProperty("_damp");
 
-        	_attractor = serializedObject.FindProperty("_attractor");
-        	_spread    = serializedObject.FindProperty("_spread");
-        	_flow      = serializedObject.FindProperty("_flow");
+            _attractor = serializedObject.FindProperty("_attractor");
+            _spread    = serializedObject.FindProperty("_spread");
+            _flow      = serializedObject.FindProperty("_flow");
 
-        	_noiseAmplitude = serializedObject.FindProperty("_noiseAmplitude");
-        	_noiseFrequency = serializedObject.FindProperty("_noiseFrequency");
-        	_noiseSpeed     = serializedObject.FindProperty("_noiseSpeed");
-        	_noiseVariance  = serializedObject.FindProperty("_noiseVariance");
+            _noiseAmplitude = serializedObject.FindProperty("_noiseAmplitude");
+            _noiseFrequency = serializedObject.FindProperty("_noiseFrequency");
+            _noiseSpeed     = serializedObject.FindProperty("_noiseSpeed");
+            _noiseVariance  = serializedObject.FindProperty("_noiseVariance");
 
-        	_lineWidth  = serializedObject.FindProperty("_lineWidth");
-        	_colorMode  = serializedObject.FindProperty("_colorMode");
-        	_color1     = serializedObject.FindProperty("_color1");
-        	_color2     = serializedObject.FindProperty("_color2");
-        	_metallic   = serializedObject.FindProperty("_metallic");
-        	_smoothness = serializedObject.FindProperty("_smoothness");
+            _lineWidth  = serializedObject.FindProperty("_lineWidth");
+            _colorMode  = serializedObject.FindProperty("_colorMode");
+            _color1     = serializedObject.FindProperty("_color1");
+            _color2     = serializedObject.FindProperty("_color2");
+            _metallic   = serializedObject.FindProperty("_metallic");
+            _smoothness = serializedObject.FindProperty("_smoothness");
 
-        	_castShadows    = serializedObject.FindProperty("_castShadows");
-        	_receiveShadows = serializedObject.FindProperty("_receiveShadows");
+            _castShadows    = serializedObject.FindProperty("_castShadows");
+            _receiveShadows = serializedObject.FindProperty("_receiveShadows");
 
-        	_randomSeed = serializedObject.FindProperty("_randomSeed");
+            _fixTimeStep    = serializedObject.FindProperty("_fixTimeStep");
+            _stepsPerSecond = serializedObject.FindProperty("_stepsPerSecond");
+            _randomSeed     = serializedObject.FindProperty("_randomSeed");
         }
 
         public override void OnInspectorGUI()
@@ -125,6 +129,8 @@ namespace Kvant
 
             EditorGUILayout.Space();
 
+            EditorGUILayout.PropertyField(_fixTimeStep);
+            EditorGUILayout.PropertyField(_stepsPerSecond);
             EditorGUILayout.PropertyField(_randomSeed);
 
             serializedObject.ApplyModifiedProperties();

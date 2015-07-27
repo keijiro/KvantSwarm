@@ -184,6 +184,12 @@ namespace Kvant
         #region Misc Settings
 
         [SerializeField]
+        bool _fixTimeStep = true;
+
+        [SerializeField]
+        float _stepsPerSecond = 60;
+
+        [SerializeField]
         int _randomSeed = 0;
 
         #endregion
@@ -205,6 +211,7 @@ namespace Kvant
         RenderTexture _velocityBuffer2;
         Mesh _mesh;
         bool _needsReset = true;
+        float _time;
 
         // Returns how many draw calls are needed to draw all lines.
         int DrawCount {
@@ -311,10 +318,18 @@ namespace Kvant
             return mesh;
         }
 
-        void UpdateKernelShader(int editorFrame = 0)
+        void StepKernel(float time, float deltaTime)
         {
-            var m = _kernelMaterial;
+            // GPGPU buffer swap
+            var pb = _positionBuffer1;
+            var vb = _velocityBuffer1;
+            _positionBuffer1 = _positionBuffer2;
+            _velocityBuffer1 = _velocityBuffer2;
+            _positionBuffer2 = pb;
+            _velocityBuffer2 = vb;
 
+            // kernel shader parameters
+            var m = _kernelMaterial;
             m.SetVector("_Acceleration", new Vector2(_minAcceleration, _maxAcceleration));
             m.SetFloat("_Damp", _damp);
             m.SetVector("_AttractPos", _attractor);
@@ -322,21 +337,16 @@ namespace Kvant
             m.SetVector("_Flow", _flow);
             m.SetVector("_NoiseParams", new Vector4(_noiseFrequency, _noiseAmplitude, _noiseSpeed, _noiseVariance));
             m.SetFloat("_RandomSeed", _randomSeed);
+            m.SetVector("_TimeParams", new Vector2(time, deltaTime));
 
-            if (Application.isPlaying)
-                m.SetVector("_TimeParams", new Vector2(Time.time, Time.smoothDeltaTime));
-            else
-                m.SetVector("_TimeParams", new Vector2(0.1f * editorFrame, 0.1f));
-        }
+            // velocity update
+            m.SetTexture("_PositionTex", _positionBuffer1);
+            m.SetTexture("_VelocityTex", _velocityBuffer1);
+            Graphics.Blit(null, _velocityBuffer2, m, 3);
 
-        void SwapBuffers()
-        {
-            var pb = _positionBuffer1;
-            var vb = _velocityBuffer1;
-            _positionBuffer1 = _positionBuffer2;
-            _velocityBuffer1 = _velocityBuffer2;
-            _positionBuffer2 = pb;
-            _velocityBuffer2 = vb;
+            // position update
+            m.SetTexture("_VelocityTex", _velocityBuffer2);
+            Graphics.Blit(null, _positionBuffer2, m, 2);
         }
 
         void UpdateLineShader()
@@ -416,33 +426,41 @@ namespace Kvant
 
             if (Application.isPlaying)
             {
-                // Execute the kernel shaders.
-                SwapBuffers();
-                UpdateKernelShader();
+                float deltaTime;
+                int steps;
 
-                _kernelMaterial.SetTexture("_PositionTex", _positionBuffer1);
-                _kernelMaterial.SetTexture("_VelocityTex", _velocityBuffer1);
-                Graphics.Blit(null, _velocityBuffer2, _kernelMaterial, 3);
+                if (_fixTimeStep)
+                {
+                    // Fixed time step.
+                    deltaTime = 1.0f / _stepsPerSecond;
+                    steps = Mathf.RoundToInt(Time.deltaTime * _stepsPerSecond);
+                }
+                else
+                {
+                    // Variable time step.
+                    deltaTime = Time.smoothDeltaTime;
+                    steps = 1;
+                }
 
-                _kernelMaterial.SetTexture("_VelocityTex", _velocityBuffer2);
-                Graphics.Blit(null, _positionBuffer2, _kernelMaterial, 2);
+                // Time steps.
+                for (var i = 0; i < steps; i++)
+                {
+                    _time += deltaTime;
+                    StepKernel(_time, deltaTime);
+                }
             }
             else
             {
-                // Reset and execute the kernel shaders repeatedly.
+                // Reset simulation state.
                 Graphics.Blit(null, _positionBuffer2, _kernelMaterial, 0);
                 Graphics.Blit(null, _velocityBuffer2, _kernelMaterial, 1);
+                _time = 0;
 
-                for (var i = 0; i < 32; i++) {
-                    SwapBuffers();
-                    UpdateKernelShader(i);
-
-                    _kernelMaterial.SetTexture("_PositionTex", _positionBuffer1);
-                    _kernelMaterial.SetTexture("_VelocityTex", _velocityBuffer1);
-                    Graphics.Blit(null, _velocityBuffer2, _kernelMaterial, 3);
-
-                    _kernelMaterial.SetTexture("_VelocityTex", _velocityBuffer2);
-                    Graphics.Blit(null, _positionBuffer2, _kernelMaterial, 2);
+                // Advance for a short period of time.
+                for (var i = 0; i < 32; i++)
+                {
+                    _time += 0.1f;
+                    StepKernel(_time, 0.1f);
                 }
             }
 
