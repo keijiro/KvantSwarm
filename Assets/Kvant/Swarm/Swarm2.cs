@@ -184,7 +184,7 @@ namespace Kvant
         #region Misc Settings
 
         [SerializeField]
-        bool _fixTimeStep = true;
+        bool _fixTimeStep = false;
 
         [SerializeField]
         float _stepsPerSecond = 60;
