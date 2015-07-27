@@ -351,7 +351,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   positionFrequency: .200000003
   rotationFrequency: .200000003
-  positionAmount: 2
+  positionAmount: .5
   rotationAmount: 0
   positionComponents: {x: 1, y: 1, z: 1}
   rotationComponents: {x: 1, y: 1, z: 0}
@@ -385,8 +385,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _lineCount: 2000
-  _historyLength: 128
-  _minAcceleration: .800000012
+  _historyLength: 200
+  _minAcceleration: 1
   _maxAcceleration: 4
   _damp: .400000006
   _attractor: {x: 0, y: 0, z: 0}
@@ -396,6 +396,8 @@ MonoBehaviour:
   _noiseFrequency: .219999999
   _noiseSpeed: .300000012
   _noiseVariance: 1
+  _swirlStrength: 0
+  _swirlDensity: 1
   _lineWidth: .0399999991
   _colorMode: 0
   _color1: {r: 1, g: 1, b: 1, a: 1}
@@ -464,9 +466,9 @@ MonoBehaviour:
   positionFrequency: .200000003
   rotationFrequency: .100000001
   positionAmount: 0
-  rotationAmount: 60
+  rotationAmount: 90
   positionComponents: {x: 1, y: 1, z: 1}
-  rotationComponents: {x: 2, y: 1, z: 1}
+  rotationComponents: {x: 1, y: 1, z: 1}
   positionOctave: 3
   rotationOctave: 2
 --- !u!1 &1828550056

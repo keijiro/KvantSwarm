@@ -429,6 +429,8 @@ MonoBehaviour:
   _noiseFrequency: .219999999
   _noiseSpeed: .300000012
   _noiseVariance: 1
+  _swirlStrength: 0
+  _swirlDensity: 1
   _colorMode: 1
   _color1: {r: .960953355, g: 1, b: .595588207, a: .370000005}
   _color2: {r: .415549308, g: .863045871, b: .926470578, a: .370000005}
