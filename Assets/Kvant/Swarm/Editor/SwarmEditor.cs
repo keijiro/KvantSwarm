@@ -113,7 +113,8 @@ namespace Kvant
             EditorGUILayout.Space();
 
             EditorGUILayout.PropertyField(_fixTimeStep);
-            EditorGUILayout.PropertyField(_stepsPerSecond);
+            if (_fixTimeStep.hasMultipleDifferentValues || _fixTimeStep.boolValue)
+                EditorGUILayout.PropertyField(_stepsPerSecond);
             EditorGUILayout.PropertyField(_randomSeed);
 
             serializedObject.ApplyModifiedProperties();
