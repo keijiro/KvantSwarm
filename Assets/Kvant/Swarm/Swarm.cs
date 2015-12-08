@@ -90,11 +90,11 @@ namespace Kvant
         }
 
         [SerializeField]
-        float _noiseSpeed = 1.0f;
+        float _noiseMotion = 1.0f;
 
-        public float noiseSpeed {
-            get { return _noiseSpeed; }
-            set { _noiseSpeed = value; }
+        public float noiseMotion {
+            get { return _noiseMotion; }
+            set { _noiseMotion = value; }
         }
 
         [SerializeField]
@@ -348,6 +348,8 @@ namespace Kvant
             // kernel shader parameters
             var m = _kernelMaterial;
 
+            m.SetVector("_Flow", _flow);
+
             var minForce = _forcePerDistance * (1 - _forceRandomness);
             var drag = Mathf.Exp(-_drag * deltaTime);
             m.SetVector("_Acceleration",
@@ -356,19 +358,18 @@ namespace Kvant
             m.SetVector("_Attractor",
                 new Vector4(_attractor.x, _attractor.y, _attractor.z, _spread));
 
-            m.SetVector("_Flow", _flow);
-
-            m.SetVector("_NoiseParams", new Vector4(_noiseFrequency, _noiseAmplitude, _noiseSpeed, _noiseVariance));
+            m.SetVector("_NoiseParams",
+                new Vector4(_noiseFrequency, _noiseAmplitude, _noiseMotion, _noiseVariance));
             m.SetVector("_NoiseOffset", _noiseOffset);
-
             m.SetVector("_SwirlParams", new Vector2(_swirlStrength, _swirlDensity));
-            m.SetFloat("_RandomSeed", _randomSeed);
-            m.SetVector("_TimeParams", new Vector2(time, deltaTime));
 
             if (_swirlStrength > 0.0f)
                 m.EnableKeyword("ENABLE_SWIRL");
             else
                 m.DisableKeyword("ENABLE_SWIRL");
+
+            m.SetFloat("_RandomSeed", _randomSeed);
+            m.SetVector("_TimeParams", new Vector2(time, deltaTime));
 
             // velocity update
             m.SetTexture("_PositionTex", _positionBuffer1);

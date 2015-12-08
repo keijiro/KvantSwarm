@@ -21,7 +21,7 @@ namespace Kvant
 
         SerializedProperty _noiseAmplitude;
         SerializedProperty _noiseFrequency;
-        SerializedProperty _noiseSpeed;
+        SerializedProperty _noiseMotion;
         SerializedProperty _noiseVariance;
 
         SerializedProperty _swirlStrength;
@@ -45,7 +45,7 @@ namespace Kvant
         static GUIContent _textAttractor = new GUIContent("Attractor Position");
         static GUIContent _textFlow      = new GUIContent("Flow Vector");
         static GUIContent _textFrequency = new GUIContent("Frequency");
-        static GUIContent _textSpeed     = new GUIContent("Speed");
+        static GUIContent _textMotion    = new GUIContent("Motion");
         static GUIContent _textVariance  = new GUIContent("Variance");
 
         void OnEnable()
@@ -62,7 +62,7 @@ namespace Kvant
 
             _noiseAmplitude = serializedObject.FindProperty("_noiseAmplitude");
             _noiseFrequency = serializedObject.FindProperty("_noiseFrequency");
-            _noiseSpeed     = serializedObject.FindProperty("_noiseSpeed");
+            _noiseMotion    = serializedObject.FindProperty("_noiseMotion");
             _noiseVariance  = serializedObject.FindProperty("_noiseVariance");
 
             _swirlStrength = serializedObject.FindProperty("_swirlStrength");
@@ -110,15 +110,15 @@ namespace Kvant
             EditorGUILayout.Space();
 
             EditorGUILayout.LabelField("Turbulent Noise", EditorStyles.boldLabel);
-            EditorGUILayout.Slider(_noiseAmplitude, 0.0f, 10.0f, _textAmplitude);
-            EditorGUILayout.Slider(_noiseFrequency, 0.01f, 1.0f, _textFrequency);
-            EditorGUILayout.Slider(_noiseSpeed, 0.0f, 5.0f, _textSpeed);
-            EditorGUILayout.Slider(_noiseVariance, 0.0f, 10.0f, _textVariance);
+            EditorGUILayout.PropertyField(_noiseAmplitude, _textAmplitude);
+            EditorGUILayout.PropertyField(_noiseFrequency, _textFrequency);
+            EditorGUILayout.PropertyField(_noiseMotion, _textMotion);
+            EditorGUILayout.PropertyField(_noiseVariance, _textVariance);
 
             EditorGUILayout.Space();
 
-            EditorGUILayout.Slider(_swirlStrength, 0.0f, 2.0f);
-            EditorGUILayout.Slider(_swirlDensity, 0.01f, 5.0f);
+            EditorGUILayout.PropertyField(_swirlStrength);
+            EditorGUILayout.PropertyField(_swirlDensity);
 
             EditorGUILayout.Space();
 

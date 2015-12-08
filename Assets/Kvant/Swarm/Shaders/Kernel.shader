@@ -32,7 +32,7 @@ Shader "Hidden/Kvant/Swarm/Kernel"
     float3 _Acceleration;   // min, max, drag
     float4 _Attractor;      // x, y, z, spread
     float3 _Flow;
-    float4 _NoiseParams; // (frequency, amplitude, animation, variance)
+    float4 _NoiseParams; // (frequency, amplitude, motion, variance)
     float3 _NoiseOffset;
     float2 _SwirlParams; // (strength, density)
     float _RandomSeed;
