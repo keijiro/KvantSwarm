@@ -1,13 +1,13 @@
 //
 // GPGPU kernels for Swarm
 //
-// Texture format:
+// Position buffer format:
+// .xyz = particle position
+// .w   = random number
 //
-// _PositionTex.xyz = position
-// _PositionTex.w   = random number
-//
-// _VelocityTex.xyz = velocity vector
-// _VelocityTex.w   = 0
+// Velocity buffer format:
+// .xyz = particle velocity
+// .w   = 0
 //
 Shader "Hidden/Kvant/Swarm/Kernel"
 {
@@ -65,19 +65,19 @@ Shader "Hidden/Kvant/Swarm/Kernel"
     }
 
     // Pass 0: position initialization
-    float4 frag_init_position(v2f_img i) : SV_Target 
+    float4 frag_init_position(v2f_img i) : SV_Target
     {
         return float4(0, 0, 0, nrand(i.uv.yy, 3));
     }
 
     // Pass 1: velocity initialization
-    float4 frag_init_velocity(v2f_img i) : SV_Target 
+    float4 frag_init_velocity(v2f_img i) : SV_Target
     {
         return (float4)0;
     }
 
     // Pass 2: position update
-    float4 frag_update_position(v2f_img i) : SV_Target 
+    float4 frag_update_position(v2f_img i) : SV_Target
     {
         // Fetch the current position (u=0) or the previous position (u>0).
         float2 uv_prev = float2(_PositionTex_TexelSize.x, 0);
@@ -99,7 +99,7 @@ Shader "Hidden/Kvant/Swarm/Kernel"
     }
 
     // Pass 3: velocity update
-    float4 frag_update_velocity(v2f_img i) : SV_Target 
+    float4 frag_update_velocity(v2f_img i) : SV_Target
     {
         // Only needs the leftmost pixel.
         float2 uv = i.uv * float2(0, 1);
