@@ -33,6 +33,7 @@ Shader "Hidden/Kvant/Swarm/Kernel"
     float4 _Attractor;      // x, y, z, spread
     float3 _Flow;
     float4 _NoiseParams; // (frequency, amplitude, animation, variance)
+    float3 _NoiseOffset;
     float2 _SwirlParams; // (strength, density)
     float _RandomSeed;
     float2 _TimeParams; // (current, delta)
@@ -47,7 +48,7 @@ Shader "Hidden/Kvant/Swarm/Kernel"
     // Position dependant force field
     float3 position_force(float3 p, float2 uv)
     {
-        p = p * _NoiseParams.x + _TimeParams.x * _NoiseParams.z + _RandomSeed;
+        p = (p + _NoiseOffset) * _NoiseParams.x + _TimeParams.x * _NoiseParams.z;
         float3 uvc = float3(uv, 7.919) * _NoiseParams.w;
         float3 n1 = snoise_grad(p + uvc.xyz);
         float3 n2 = snoise_grad(p + uvc.yzx);

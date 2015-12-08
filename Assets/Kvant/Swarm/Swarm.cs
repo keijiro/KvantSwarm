@@ -223,6 +223,7 @@ namespace Kvant
         RenderTexture _velocityBuffer2;
         Mesh _mesh;
         bool _needsReset = true;
+        Vector3 _noiseOffset;
         float _time;
 
         // Returns how many draw calls are needed to draw all lines.
@@ -340,6 +341,10 @@ namespace Kvant
             _positionBuffer2 = pb;
             _velocityBuffer2 = vb;
 
+            // private state update
+            _time += deltaTime;
+            _noiseOffset += _flow * deltaTime;
+
             // kernel shader parameters
             var m = _kernelMaterial;
 
@@ -352,7 +357,10 @@ namespace Kvant
                 new Vector4(_attractor.x, _attractor.y, _attractor.z, _spread));
 
             m.SetVector("_Flow", _flow);
+
             m.SetVector("_NoiseParams", new Vector4(_noiseFrequency, _noiseAmplitude, _noiseSpeed, _noiseVariance));
+            m.SetVector("_NoiseOffset", _noiseOffset);
+
             m.SetVector("_SwirlParams", new Vector2(_swirlStrength, _swirlDensity));
             m.SetFloat("_RandomSeed", _randomSeed);
             m.SetVector("_TimeParams", new Vector2(time, deltaTime));
@@ -415,12 +423,15 @@ namespace Kvant
             // shader materials
             if (!_kernelMaterial) _kernelMaterial = CreateMaterial(_kernelShader);
             if (!_lineMaterial)   _lineMaterial   = CreateMaterial(_lineShader);
+        }
 
-            // buffer initialization
+        void ResetState()
+        {
+            _noiseOffset = Vector3.one * _randomSeed;
+            _time = 0;
+
             Graphics.Blit(null, _positionBuffer2, _kernelMaterial, 0);
             Graphics.Blit(null, _velocityBuffer2, _kernelMaterial, 1);
-
-            _needsReset = false;
         }
 
         #endregion
@@ -445,7 +456,12 @@ namespace Kvant
 
         void Update()
         {
-            if (_needsReset) ResetResources();
+            if (_needsReset)
+            {
+                ResetResources();
+                ResetState();
+                _needsReset = false;
+            }
 
             if (Application.isPlaying)
             {
@@ -467,24 +483,15 @@ namespace Kvant
 
                 // Time steps.
                 for (var i = 0; i < steps; i++)
-                {
-                    _time += deltaTime;
                     StepKernel(_time, deltaTime);
-                }
             }
             else
             {
-                // Reset simulation state.
-                Graphics.Blit(null, _positionBuffer2, _kernelMaterial, 0);
-                Graphics.Blit(null, _velocityBuffer2, _kernelMaterial, 1);
-                _time = 0;
+                ResetState();
 
                 // Advance for a short period of time.
                 for (var i = 0; i < 32; i++)
-                {
-                    _time += 0.1f;
                     StepKernel(_time, 0.1f);
-                }
             }
 
             // Draw lines.
