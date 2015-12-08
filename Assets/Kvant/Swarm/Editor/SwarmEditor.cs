@@ -14,7 +14,7 @@ namespace Kvant
 
         SerializedProperty _minAcceleration;
         SerializedProperty _maxAcceleration;
-        SerializedProperty _damp;
+        SerializedProperty _drag;
 
         SerializedProperty _attractor;
         SerializedProperty _spread;
@@ -55,7 +55,7 @@ namespace Kvant
 
             _minAcceleration = serializedObject.FindProperty("_minAcceleration");
             _maxAcceleration = serializedObject.FindProperty("_maxAcceleration");
-            _damp            = serializedObject.FindProperty("_damp");
+            _drag            = serializedObject.FindProperty("_drag");
 
             _attractor = serializedObject.FindProperty("_attractor");
             _spread    = serializedObject.FindProperty("_spread");
@@ -101,7 +101,7 @@ namespace Kvant
 
             EditorGUILayout.LabelField("Dynamics", EditorStyles.boldLabel);
             MinMaxSlider(_textAcceleration, _minAcceleration, _maxAcceleration, 0.01f, 10.0f);
-            EditorGUILayout.Slider(_damp, 0, 5);
+            EditorGUILayout.PropertyField(_drag);
 
             EditorGUILayout.Space();
 

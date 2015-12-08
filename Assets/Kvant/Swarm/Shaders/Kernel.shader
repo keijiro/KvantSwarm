@@ -29,8 +29,7 @@ Shader "Hidden/Kvant/Swarm/Kernel"
     float4 _PositionTex_TexelSize;
     float4 _VelocityTex_TexelSize;
 
-    float2 _Acceleration; // (min, max)
-    float _Damp;
+    float3 _Acceleration; // min, max, drag
     float3 _AttractPos;
     float _Spread;
     float3 _Flow;
@@ -114,8 +113,8 @@ Shader "Hidden/Kvant/Swarm/Kernel"
         // Acceleration force
         float3 acf = attract_point(i.uv) - p + position_force(p, uv);
 
-        // Damping
-        v *= (1.0 - _Damp * _TimeParams.y);
+        // Drag
+        v *= _Acceleration.z;
 
         // Acceleration
         v += acs * acf * _TimeParams.y;

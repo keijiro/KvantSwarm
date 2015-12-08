@@ -37,12 +37,12 @@ namespace Kvant
             set { _maxAcceleration = value; }
         }
 
-        [SerializeField]
-        float _damp = 0.5f;
+        [SerializeField, Range(0, 6)]
+        float _drag = 1.0f;
 
-        public float damp {
-            get { return _damp; }
-            set { _damp = value; }
+        public float drag {
+            get { return _drag; }
+            set { _drag = value; }
         }
 
         #endregion
@@ -346,8 +346,7 @@ namespace Kvant
 
             // kernel shader parameters
             var m = _kernelMaterial;
-            m.SetVector("_Acceleration", new Vector2(_minAcceleration, _maxAcceleration));
-            m.SetFloat("_Damp", _damp);
+            m.SetVector("_Acceleration", new Vector3(_minAcceleration, _maxAcceleration, Mathf.Exp(-_drag * deltaTime)));
             m.SetVector("_AttractPos", _attractor);
             m.SetFloat("_Spread", _spread);
             m.SetVector("_Flow", _flow);
