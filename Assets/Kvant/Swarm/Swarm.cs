@@ -368,8 +368,7 @@ namespace Kvant
             else
                 m.DisableKeyword("ENABLE_SWIRL");
 
-            m.SetFloat("_RandomSeed", _randomSeed);
-            m.SetVector("_TimeParams", new Vector2(time, deltaTime));
+            m.SetVector("_Config", new Vector3(time, deltaTime, _randomSeed));
 
             // velocity update
             m.SetTexture("_PositionTex", _positionBuffer1);
