@@ -17,9 +17,33 @@ namespace Kvant
         [SerializeField]
         int _historyLength = 32;
 
+        [SerializeField]
+        Vector3 _flow = Vector3.zero;
+
+        public Vector3 flow {
+            get { return _flow; }
+            set { _flow = value; }
+        }
+
         #endregion
 
-        #region Dynamics Parameters
+        #region Attractor Parameters
+
+        [SerializeField]
+        Vector3 _attractor = Vector3.zero;
+
+        public Vector3 attractor {
+            get { return _attractor; }
+            set { _attractor = value; }
+        }
+
+        [SerializeField]
+        float _spread = 0.2f;
+
+        public float spread {
+            get { return _spread; }
+            set { _spread = value; }
+        }
 
         [SerializeField]
         float _forcePerDistance = 1.0f;
@@ -43,34 +67,6 @@ namespace Kvant
         public float drag {
             get { return _drag; }
             set { _drag = value; }
-        }
-
-        #endregion
-
-        #region External Forces
-
-        [SerializeField]
-        Vector3 _attractor = Vector3.zero;
-
-        public Vector3 attractor {
-            get { return _attractor; }
-            set { _attractor = value; }
-        }
-
-        [SerializeField]
-        float _spread = 0.2f;
-
-        public float spread {
-            get { return _spread; }
-            set { _spread = value; }
-        }
-
-        [SerializeField]
-        Vector3 _flow = Vector3.zero;
-
-        public Vector3 flow {
-            get { return _flow; }
-            set { _flow = value; }
         }
 
         #endregion
