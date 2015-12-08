@@ -22,19 +22,19 @@ namespace Kvant
         #region Dynamics Parameters
 
         [SerializeField]
-        float _minAcceleration = 0.5f;
+        float _forcePerDistance = 1.0f;
 
-        public float minAcceleration {
-            get { return _minAcceleration; }
-            set { _minAcceleration = value; }
+        public float forcePerDistance {
+            get { return _forcePerDistance; }
+            set { _forcePerDistance = value; }
         }
 
-        [SerializeField]
-        float _maxAcceleration = 1.0f;
+        [SerializeField, Range(0, 1)]
+        float _forceRandomness = 0.5f;
 
-        public float maxAcceleration {
-            get { return _maxAcceleration; }
-            set { _maxAcceleration = value; }
+        public float forceRandomness {
+            get { return _forceRandomness; }
+            set { _forceRandomness = value; }
         }
 
         [SerializeField, Range(0, 6)]
@@ -346,9 +346,15 @@ namespace Kvant
 
             // kernel shader parameters
             var m = _kernelMaterial;
-            m.SetVector("_Acceleration", new Vector3(_minAcceleration, _maxAcceleration, Mathf.Exp(-_drag * deltaTime)));
-            m.SetVector("_AttractPos", _attractor);
-            m.SetFloat("_Spread", _spread);
+
+            var minForce = _forcePerDistance * (1 - _forceRandomness);
+            var drag = Mathf.Exp(-_drag * deltaTime);
+            m.SetVector("_Acceleration",
+                new Vector3(minForce, _forcePerDistance, drag));
+
+            m.SetVector("_Attractor",
+                new Vector4(_attractor.x, _attractor.y, _attractor.z, _spread));
+
             m.SetVector("_Flow", _flow);
             m.SetVector("_NoiseParams", new Vector4(_noiseFrequency, _noiseAmplitude, _noiseSpeed, _noiseVariance));
             m.SetVector("_SwirlParams", new Vector2(_swirlStrength, _swirlDensity));

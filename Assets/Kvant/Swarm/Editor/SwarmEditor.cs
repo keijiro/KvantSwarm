@@ -12,8 +12,8 @@ namespace Kvant
         SerializedProperty _lineCount;
         SerializedProperty _historyLength;
 
-        SerializedProperty _minAcceleration;
-        SerializedProperty _maxAcceleration;
+        SerializedProperty _forcePerDistance;
+        SerializedProperty _forceRandomness;
         SerializedProperty _drag;
 
         SerializedProperty _attractor;
@@ -42,7 +42,6 @@ namespace Kvant
         SerializedProperty _stepsPerSecond;
         SerializedProperty _randomSeed;
 
-        static GUIContent _textAcceleration = new GUIContent("Acceleration");
         static GUIContent _textAmplitude    = new GUIContent("Amplitude");
         static GUIContent _textFrequency    = new GUIContent("Frequency");
         static GUIContent _textSpeed        = new GUIContent("Speed");
@@ -53,9 +52,9 @@ namespace Kvant
             _lineCount     = serializedObject.FindProperty("_lineCount");
             _historyLength = serializedObject.FindProperty("_historyLength");
 
-            _minAcceleration = serializedObject.FindProperty("_minAcceleration");
-            _maxAcceleration = serializedObject.FindProperty("_maxAcceleration");
-            _drag            = serializedObject.FindProperty("_drag");
+            _forcePerDistance = serializedObject.FindProperty("_forcePerDistance");
+            _forceRandomness  = serializedObject.FindProperty("_forceRandomness");
+            _drag             = serializedObject.FindProperty("_drag");
 
             _attractor = serializedObject.FindProperty("_attractor");
             _spread    = serializedObject.FindProperty("_spread");
@@ -100,7 +99,8 @@ namespace Kvant
             EditorGUILayout.Space();
 
             EditorGUILayout.LabelField("Dynamics", EditorStyles.boldLabel);
-            MinMaxSlider(_textAcceleration, _minAcceleration, _maxAcceleration, 0.01f, 10.0f);
+            EditorGUILayout.PropertyField(_forcePerDistance);
+            EditorGUILayout.PropertyField(_forceRandomness);
             EditorGUILayout.PropertyField(_drag);
 
             EditorGUILayout.Space();

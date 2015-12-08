@@ -29,9 +29,8 @@ Shader "Hidden/Kvant/Swarm/Kernel"
     float4 _PositionTex_TexelSize;
     float4 _VelocityTex_TexelSize;
 
-    float3 _Acceleration; // min, max, drag
-    float3 _AttractPos;
-    float _Spread;
+    float3 _Acceleration;   // min, max, drag
+    float4 _Attractor;      // x, y, z, spread
     float3 _Flow;
     float4 _NoiseParams; // (frequency, amplitude, animation, variance)
     float2 _SwirlParams; // (strength, density)
@@ -60,7 +59,7 @@ Shader "Hidden/Kvant/Swarm/Kernel"
     float3 attract_point(float2 uv)
     {
         float3 r = float3(nrand(uv, 0), nrand(uv, 1), nrand(uv, 2));
-        return _AttractPos + (r - (float3)0.5) * _Spread;
+        return _Attractor.xyz + (r - (float3)0.5) * _Attractor.w;
     }
 
     // Pass 0: position initialization
