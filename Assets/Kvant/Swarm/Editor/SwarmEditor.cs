@@ -1,13 +1,13 @@
 //
-// Custom editor class for Swarm2
+// Custom editor class for Swarm
 //
 using UnityEngine;
 using UnityEditor;
 
 namespace Kvant
 {
-    [CanEditMultipleObjects, CustomEditor(typeof(Swarm2))]
-    public class Swarm2Editor : Editor
+    [CanEditMultipleObjects, CustomEditor(typeof(Swarm))]
+    public class SwarmEditor : Editor
     {
         SerializedProperty _lineCount;
         SerializedProperty _historyLength;
@@ -86,7 +86,7 @@ namespace Kvant
 
         public override void OnInspectorGUI()
         {
-            var instance = target as Swarm2;
+            var instance = target as Swarm;
 
             serializedObject.Update();
 

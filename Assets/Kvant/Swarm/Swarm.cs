@@ -1,13 +1,13 @@
 //
-// Swarm2 - opaque flowing lines animation
+// Swarm - flowing lines animation
 //
 using UnityEngine;
 using UnityEngine.Rendering;
 
 namespace Kvant
 {
-    [ExecuteInEditMode, AddComponentMenu("Kvant/Swarm2")]
-    public class Swarm2 : MonoBehaviour
+    [ExecuteInEditMode, AddComponentMenu("Kvant/Swarm")]
+    public class Swarm : MonoBehaviour
     {
         #region Basic Configuration
 
