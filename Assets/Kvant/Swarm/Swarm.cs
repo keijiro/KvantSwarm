@@ -90,6 +90,14 @@ namespace Kvant
         }
 
         [SerializeField]
+        float _noiseSpread = 1.0f;
+
+        public float noiseSpread {
+            get { return _noiseSpread; }
+            set { _noiseSpread = value; }
+        }
+
+        [SerializeField]
         float _noiseMotion = 1.0f;
 
         public float noiseMotion {
@@ -98,27 +106,19 @@ namespace Kvant
         }
 
         [SerializeField]
-        float _noiseVariance = 1.0f;
+        float _swirlAmplitude = 0.0f;
 
-        public float noiseVariance {
-            get { return _noiseVariance; }
-            set { _noiseVariance = value; }
+        public float swirlAmplitude {
+            get { return _swirlAmplitude; }
+            set { _swirlAmplitude = value; }
         }
 
         [SerializeField]
-        float _swirlStrength = 0.0f;
+        float _swirlFrequency = 1.0f;
 
-        public float swirlStrength {
-            get { return _swirlStrength; }
-            set { _swirlStrength = value; }
-        }
-
-        [SerializeField]
-        float _swirlDensity = 1.0f;
-
-        public float swirlDensity {
-            get { return _swirlDensity; }
-            set { _swirlDensity = value; }
+        public float swirlFrequency {
+            get { return _swirlFrequency; }
+            set { _swirlFrequency = value; }
         }
 
         #endregion
@@ -344,6 +344,7 @@ namespace Kvant
             // private state update
             _time += deltaTime;
             _noiseOffset += _flow * deltaTime;
+            _noiseOffset += Vector3.one * _noiseMotion * deltaTime;
 
             // kernel shader parameters
             var m = _kernelMaterial;
@@ -352,18 +353,14 @@ namespace Kvant
 
             var minForce = _forcePerDistance * (1 - _forceRandomness);
             var drag = Mathf.Exp(-_drag * deltaTime);
-            m.SetVector("_Acceleration",
-                new Vector3(minForce, _forcePerDistance, drag));
+            m.SetVector("_Acceleration", new Vector3(minForce, _forcePerDistance, drag));
+            m.SetVector("_Attractor", new Vector4(_attractor.x, _attractor.y, _attractor.z, _spread));
 
-            m.SetVector("_Attractor",
-                new Vector4(_attractor.x, _attractor.y, _attractor.z, _spread));
-
-            m.SetVector("_NoiseParams",
-                new Vector4(_noiseFrequency, _noiseAmplitude, _noiseMotion, _noiseVariance));
+            m.SetVector("_NoiseParams", new Vector3(_noiseAmplitude, _noiseFrequency, _noiseSpread));
             m.SetVector("_NoiseOffset", _noiseOffset);
-            m.SetVector("_SwirlParams", new Vector2(_swirlStrength, _swirlDensity));
+            m.SetVector("_SwirlParams", new Vector2(_swirlAmplitude, _swirlFrequency));
 
-            if (_swirlStrength > 0.0f)
+            if (_swirlAmplitude > 0.0f)
                 m.EnableKeyword("ENABLE_SWIRL");
             else
                 m.DisableKeyword("ENABLE_SWIRL");

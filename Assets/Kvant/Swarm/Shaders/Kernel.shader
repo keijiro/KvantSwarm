@@ -32,9 +32,9 @@ Shader "Hidden/Kvant/Swarm/Kernel"
     float3 _Acceleration;   // min, max, drag
     float4 _Attractor;      // x, y, z, spread
     float3 _Flow;
-    float4 _NoiseParams; // (frequency, amplitude, motion, variance)
+    float3 _NoiseParams;    // amplitude, frequency, spread
     float3 _NoiseOffset;
-    float2 _SwirlParams; // (strength, density)
+    float2 _SwirlParams;    // amplitude, frequency
     float3 _Config;         // currentTime, deltaTime, randomSeed
 
     // Pseudo random number generator
@@ -47,12 +47,10 @@ Shader "Hidden/Kvant/Swarm/Kernel"
     // Position dependant force field
     float3 position_force(float3 p, float2 uv)
     {
-        p = (p + _NoiseOffset) * _NoiseParams.x + _Config.x * _NoiseParams.z;
-        float3 uvc = float3(uv, 7.919) * _NoiseParams.w;
-        float3 n1 = snoise_grad(p + uvc.xyz);
-        float3 n2 = snoise_grad(p + uvc.yzx);
-        return cross(n1, n2) * _NoiseParams.y * 0.1;
-        // FIXME: remove 0.1, that's very magic#
+        p += float3(0.9, 1.0, 1.1) * uv.y * _NoiseParams.z;
+        float3 n1 = snoise_grad(p);
+        float3 n2 = snoise_grad(p + float3(15.3, 13.1, 17.4));
+        return cross(n1, n2);
     }
 
     // Attractor position
@@ -87,7 +85,8 @@ Shader "Hidden/Kvant/Swarm/Kernel"
         // Use the flow vector or add swirl vector.
         float3 flow = _Flow;
 #if ENABLE_SWIRL
-        flow += position_force(p.xyz * _SwirlParams.y, i.uv) * _SwirlParams.x;
+        float3 np = (p.xyz + _NoiseOffset) * _SwirlParams.y;
+        flow += position_force(np, i.uv) * _SwirlParams.x;
 #endif
         // Add the velocity (u=0) or the flow vector (u>0).
         float u_0 = i.uv.x < _PositionTex_TexelSize.x;
@@ -109,14 +108,17 @@ Shader "Hidden/Kvant/Swarm/Kernel"
         // Acceleration scale factor
         float acs = lerp(_Acceleration.x, _Acceleration.y, nrand(uv, 4));
 
+        float3 np = (p + _NoiseOffset) * _NoiseParams.y;
+
         // Acceleration force
-        float3 acf = attract_point(i.uv) - p + position_force(p, uv);
+        float3 f1 = (attract_point(i.uv) - p) * acs;
+        float3 f2 = position_force(np, uv) * _NoiseParams.x;
 
         // Drag
         v *= _Acceleration.z;
 
         // Acceleration
-        v += acs * acf * _Config.y;
+        v += (f1 + f2) * _Config.y;
 
         return float4(v, 0);
     }
