@@ -93,9 +93,10 @@ namespace Kvant
 
             EditorGUILayout.PropertyField(_lineCount);
             EditorGUILayout.PropertyField(_historyLength);
-            EditorGUILayout.PropertyField(_flow, _textFlow);
 
             if (EditorGUI.EndChangeCheck()) instance.NotifyConfigChange();
+
+            EditorGUILayout.PropertyField(_flow, _textFlow);
 
             EditorGUILayout.Space();
 
