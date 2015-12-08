@@ -22,7 +22,7 @@ Shader "Hidden/Kvant/Swarm/Kernel"
     #pragma multi_compile _ ENABLE_SWIRL
 
     #include "UnityCG.cginc"
-    #include "ClassicNoise3D.cginc"
+    #include "SimplexNoiseGrad3D.cginc"
 
     sampler2D _PositionTex;
     sampler2D _VelocityTex;
@@ -51,10 +51,10 @@ Shader "Hidden/Kvant/Swarm/Kernel"
     {
         p = p * _NoiseParams.x + _TimeParams.x * _NoiseParams.z + _RandomSeed;
         float3 uvc = float3(uv, 7.919) * _NoiseParams.w;
-        float nx = cnoise(p + uvc.xyz);
-        float ny = cnoise(p + uvc.yzx);
-        float nz = cnoise(p + uvc.zxy);
-        return float3(nx, ny, nz) * _NoiseParams.y;
+        float3 n1 = snoise_grad(p + uvc.xyz);
+        float3 n2 = snoise_grad(p + uvc.yzx);
+        return cross(n1, n2) * _NoiseParams.y * 0.1;
+        // FIXME: remove 0.1, that's very magic#
     }
 
     // Attractor position
