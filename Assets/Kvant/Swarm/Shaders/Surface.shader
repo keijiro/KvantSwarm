@@ -22,11 +22,13 @@ Shader "Hidden/Kvant/Swarm/Surface"
     sampler2D _PositionTex;
     float4 _PositionTex_TexelSize;
 
-    float _LineWidth;
     half4 _Color1;
     half4 _Color2;
     half _Metallic;
     half _Smoothness;
+
+    float2 _LineWidth; // min, max
+    float _Throttle;
 
     float2 _BufferOffset;
 
@@ -59,7 +61,11 @@ Shader "Hidden/Kvant/Swarm/Surface"
         // binormal vector
         float3 bn = normalize(cross(p3 - p2, p2 - p1)) * flip;
 
-        v.vertex.xyz = p2 + bn * _LineWidth * nrand(ln, 10) * v.vertex.x;
+        // line width
+        float lw = lerp(_LineWidth.x, _LineWidth.y, nrand(ln, 10));
+        lw *= saturate((_Throttle - ln) / _PositionTex_TexelSize.y);
+
+        v.vertex.xyz = p2 + bn * lw * v.vertex.x;
         v.normal = normalize(cross(bn, p2 - p1));
 
 #if COLOR_RANDOM

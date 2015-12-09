@@ -11,6 +11,7 @@ namespace Kvant
     {
         SerializedProperty _lineCount;
         SerializedProperty _historyLength;
+        SerializedProperty _throttle;
         SerializedProperty _flow;
 
         SerializedProperty _attractor;
@@ -28,6 +29,7 @@ namespace Kvant
         SerializedProperty _swirlFrequency;
 
         SerializedProperty _lineWidth;
+        SerializedProperty _lineWidthRandomness;
         SerializedProperty _colorMode;
         SerializedProperty _color1;
         SerializedProperty _color2;
@@ -52,6 +54,7 @@ namespace Kvant
         {
             _lineCount     = serializedObject.FindProperty("_lineCount");
             _historyLength = serializedObject.FindProperty("_historyLength");
+            _throttle      = serializedObject.FindProperty("_throttle");
             _flow          = serializedObject.FindProperty("_flow");
 
             _attractor        = serializedObject.FindProperty("_attractor");
@@ -68,7 +71,9 @@ namespace Kvant
             _swirlAmplitude = serializedObject.FindProperty("_swirlAmplitude");
             _swirlFrequency = serializedObject.FindProperty("_swirlFrequency");
 
-            _lineWidth  = serializedObject.FindProperty("_lineWidth");
+            _lineWidth           = serializedObject.FindProperty("_lineWidth");
+            _lineWidthRandomness = serializedObject.FindProperty("_lineWidthRandomness");
+
             _colorMode  = serializedObject.FindProperty("_colorMode");
             _color1     = serializedObject.FindProperty("_color1");
             _color2     = serializedObject.FindProperty("_color2");
@@ -96,6 +101,7 @@ namespace Kvant
 
             if (EditorGUI.EndChangeCheck()) instance.NotifyConfigChange();
 
+            EditorGUILayout.PropertyField(_throttle);
             EditorGUILayout.PropertyField(_flow, _textFlow);
 
             EditorGUILayout.Space();
@@ -123,7 +129,11 @@ namespace Kvant
             EditorGUILayout.Space();
 
             EditorGUILayout.LabelField("Render Settings", EditorStyles.boldLabel);
-            EditorGUILayout.Slider(_lineWidth, 0, 0.5f);
+            EditorGUILayout.PropertyField(_lineWidth);
+            EditorGUILayout.PropertyField(_lineWidthRandomness);
+
+            EditorGUILayout.Space();
+
             EditorGUILayout.PropertyField(_colorMode);
             EditorGUILayout.PropertyField(_color1);
             EditorGUILayout.PropertyField(_color2);

@@ -17,6 +17,14 @@ namespace Kvant
         [SerializeField]
         int _historyLength = 32;
 
+        [SerializeField, Range(0, 1)]
+        float _throttle = 1.0f;
+
+        public float throttle {
+            get { return _throttle; }
+            set { _throttle = value; }
+        }
+
         [SerializeField]
         Vector3 _flow = Vector3.zero;
 
@@ -131,6 +139,14 @@ namespace Kvant
         public float lineWidth {
             get { return _lineWidth; }
             set { _lineWidth = value; }
+        }
+
+        [SerializeField, Range(0, 1)]
+        float _lineWidthRandomness = 0.5f;
+
+        public float lineWidthRandomness {
+            get { return _lineWidthRandomness; }
+            set { _lineWidthRandomness = value; }
         }
 
         public enum ColorMode { Random, Smooth }
@@ -376,11 +392,13 @@ namespace Kvant
         {
             var m = _lineMaterial;
 
-            m.SetFloat("_LineWidth", _lineWidth);
             m.SetColor("_Color1", _color1);
             m.SetColor("_Color2", _color2);
             m.SetFloat("_Metallic", _metallic);
             m.SetFloat("_Smoothness", _smoothness);
+
+            m.SetVector("_LineWidth", new Vector2(1 -_lineWidthRandomness, 1) * _lineWidth);
+            m.SetFloat("_Throttle", _throttle);
 
             m.SetTexture("_PositionTex", _positionBuffer2);
             m.SetTexture("_VelocityTex", _velocityBuffer2);
