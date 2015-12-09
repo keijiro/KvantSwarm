@@ -222,6 +222,21 @@ namespace Kvant
 
         #endregion
 
+        #region Public Methods
+
+        public void Restart()
+        {
+            _needsReset = true;
+        }
+
+        public void Restart(int newRandomSeed)
+        {
+            _randomSeed = newRandomSeed;
+            _needsReset = true;
+        }
+
+        #endregion
+
         #region Custom Shaders
 
         [SerializeField] Shader _kernelShader;
@@ -265,11 +280,6 @@ namespace Kvant
         #endregion
 
         #region Resource Management
-
-        public void NotifyConfigChange()
-        {
-            _needsReset = true;
-        }
 
         Material CreateMaterial(Shader shader)
         {

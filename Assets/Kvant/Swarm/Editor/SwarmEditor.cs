@@ -99,7 +99,7 @@ namespace Kvant
             EditorGUILayout.PropertyField(_lineCount);
             EditorGUILayout.PropertyField(_historyLength);
 
-            if (EditorGUI.EndChangeCheck()) instance.NotifyConfigChange();
+            if (EditorGUI.EndChangeCheck()) instance.Restart();
 
             EditorGUILayout.PropertyField(_throttle);
             EditorGUILayout.PropertyField(_flow, _textFlow);
@@ -150,7 +150,10 @@ namespace Kvant
             EditorGUILayout.PropertyField(_fixTimeStep);
             if (_fixTimeStep.hasMultipleDifferentValues || _fixTimeStep.boolValue)
                 EditorGUILayout.PropertyField(_stepsPerSecond);
+
+            EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(_randomSeed);
+            if (EditorGUI.EndChangeCheck()) instance.Restart();
 
             serializedObject.ApplyModifiedProperties();
         }
