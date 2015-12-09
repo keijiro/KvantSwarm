@@ -12,10 +12,10 @@ namespace Kvant
         #region Basic Settings
 
         [SerializeField]
-        int _lineCount = 32;
+        int _lineCount = 128;
 
         [SerializeField]
-        int _historyLength = 32;
+        int _historyLength = 128;
 
         [SerializeField, Range(0, 1)]
         float _throttle = 1.0f;
@@ -46,7 +46,7 @@ namespace Kvant
         }
 
         [SerializeField]
-        float _spread = 0.2f;
+        float _spread = 0.1f;
 
         public float spread {
             get { return _spread; }
@@ -54,7 +54,7 @@ namespace Kvant
         }
 
         [SerializeField]
-        float _forcePerDistance = 1.0f;
+        float _forcePerDistance = 2.0f;
 
         public float forcePerDistance {
             get { return _forcePerDistance; }
@@ -62,7 +62,7 @@ namespace Kvant
         }
 
         [SerializeField, Range(0, 1)]
-        float _forceRandomness = 0.5f;
+        float _forceRandomness = 0.2f;
 
         public float forceRandomness {
             get { return _forceRandomness; }
@@ -70,7 +70,7 @@ namespace Kvant
         }
 
         [SerializeField, Range(0, 6)]
-        float _drag = 1.0f;
+        float _drag = 2.0f;
 
         public float drag {
             get { return _drag; }
@@ -82,7 +82,7 @@ namespace Kvant
         #region Turbulent Noise Parameters
 
         [SerializeField]
-        float _noiseAmplitude = 0.1f;
+        float _noiseAmplitude = 1.5f;
 
         public float noiseAmplitude {
             get { return _noiseAmplitude; }
@@ -90,7 +90,7 @@ namespace Kvant
         }
 
         [SerializeField]
-        float _noiseFrequency = 0.2f;
+        float _noiseFrequency = 0.1f;
 
         public float noiseFrequency {
             get { return _noiseFrequency; }
@@ -98,7 +98,7 @@ namespace Kvant
         }
 
         [SerializeField]
-        float _noiseSpread = 1.0f;
+        float _noiseSpread = 0.5f;
 
         public float noiseSpread {
             get { return _noiseSpread; }
@@ -106,7 +106,7 @@ namespace Kvant
         }
 
         [SerializeField]
-        float _noiseMotion = 1.0f;
+        float _noiseMotion = 0.5f;
 
         public float noiseMotion {
             get { return _noiseMotion; }
@@ -114,7 +114,7 @@ namespace Kvant
         }
 
         [SerializeField]
-        float _swirlAmplitude = 0.0f;
+        float _swirlAmplitude = 0.1f;
 
         public float swirlAmplitude {
             get { return _swirlAmplitude; }
@@ -122,7 +122,7 @@ namespace Kvant
         }
 
         [SerializeField]
-        float _swirlFrequency = 1.0f;
+        float _swirlFrequency = 0.15f;
 
         public float swirlFrequency {
             get { return _swirlFrequency; }
@@ -168,7 +168,7 @@ namespace Kvant
         }
 
         [SerializeField]
-        Color _color2 = Color.white;
+        Color _color2 = Color.gray;
 
         public Color color2 {
             get { return _color2; }
