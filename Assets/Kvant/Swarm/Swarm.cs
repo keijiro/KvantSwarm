@@ -360,11 +360,6 @@ namespace Kvant
             m.SetVector("_NoiseOffset", _noiseOffset);
             m.SetVector("_SwirlParams", new Vector2(_swirlAmplitude, _swirlFrequency));
 
-            if (_swirlAmplitude > 0.0f)
-                m.EnableKeyword("ENABLE_SWIRL");
-            else
-                m.DisableKeyword("ENABLE_SWIRL");
-
             m.SetVector("_Config", new Vector3(time, deltaTime, _randomSeed));
 
             // velocity update
