@@ -55,13 +55,13 @@ Shader "Hidden/Kvant/Swarm/Kernel"
     float3 attract_point(float2 uv)
     {
         float3 r = float3(nrand(uv, 0), nrand(uv, 1), nrand(uv, 2));
-        return _Attractor.xyz + (r - (float3)0.5) * _Attractor.w;
+        return _Attractor.xyz + (r - 0.5) * _Attractor.w;
     }
 
     // pass 0: position initialization
     float4 frag_init_position(v2f_img i) : SV_Target
     {
-        return float4(0, 0, 0, nrand(i.uv.yy, 3));
+        return float4(attract_point(i.uv.y + 2), nrand(i.uv.y, 6));
     }
 
     // pass 1: velocity initialization
@@ -103,8 +103,8 @@ Shader "Hidden/Kvant/Swarm/Kernel"
         float3 v = tex2D(_VelocityTex, uv).xyz;
 
         // force from the attactor
-        float accel = lerp(_Acceleration.x, _Acceleration.y, nrand(uv, 4));
-        float3 fa = (attract_point(i.uv) - p) * accel;
+        float accel = lerp(_Acceleration.x, _Acceleration.y, nrand(uv, 7));
+        float3 fa = (attract_point(uv) - p) * accel;
 
         // force from the noise vector field
         float3 np = (p + _NoiseOffset) * _NoiseParams.y;

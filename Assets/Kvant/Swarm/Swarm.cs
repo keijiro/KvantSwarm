@@ -343,26 +343,33 @@ namespace Kvant
             // private state update
             _noiseOffset += (_flow + Vector3.one * _noiseMotion) * deltaTime;
 
-            // kernel shader parameters
+            // invoking velocity update kernel
+            UpdateKernelShader(deltaTime);
+            _kernelMaterial.SetTexture("_PositionTex", _positionBuffer1);
+            _kernelMaterial.SetTexture("_VelocityTex", _velocityBuffer1);
+            Graphics.Blit(null, _velocityBuffer2, _kernelMaterial, 3);
+
+            // invoking position update kernel
+            _kernelMaterial.SetTexture("_VelocityTex", _velocityBuffer2);
+            Graphics.Blit(null, _positionBuffer2, _kernelMaterial, 2);
+        }
+
+        void UpdateKernelShader(float deltaTime)
+        {
             var m = _kernelMaterial;
+
+            m.SetVector("_Flow", _flow);
+
             var minForce = _forcePerDistance * (1 - _forceRandomness);
             var drag = Mathf.Exp(-_drag * deltaTime);
-            m.SetVector("_Flow", _flow);
             m.SetVector("_Acceleration", new Vector3(minForce, _forcePerDistance, drag));
             m.SetVector("_Attractor", new Vector4(_attractor.x, _attractor.y, _attractor.z, _spread));
+
             m.SetVector("_NoiseParams", new Vector3(_noiseAmplitude, _noiseFrequency, _noiseSpread));
             m.SetVector("_NoiseOffset", _noiseOffset);
             m.SetVector("_SwirlParams", new Vector2(_swirlAmplitude, _swirlFrequency));
+
             m.SetVector("_Config", new Vector2(deltaTime, _randomSeed));
-
-            // invoking velocity update kernel
-            m.SetTexture("_PositionTex", _positionBuffer1);
-            m.SetTexture("_VelocityTex", _velocityBuffer1);
-            Graphics.Blit(null, _velocityBuffer2, m, 3);
-
-            // invoking position update kernel
-            m.SetTexture("_VelocityTex", _velocityBuffer2);
-            Graphics.Blit(null, _positionBuffer2, m, 2);
         }
 
         void UpdateLineShader()
@@ -413,6 +420,7 @@ namespace Kvant
         void ResetState()
         {
             _noiseOffset = Vector3.one * _randomSeed;
+            UpdateKernelShader(0);
             Graphics.Blit(null, _positionBuffer2, _kernelMaterial, 0);
             Graphics.Blit(null, _velocityBuffer2, _kernelMaterial, 1);
         }
