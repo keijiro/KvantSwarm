@@ -1,67 +1,28 @@
-﻿//
-// Swarm - transparent flowing lines animation
+//
+// Swarm - flowing lines animation
 //
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Kvant
 {
     [ExecuteInEditMode, AddComponentMenu("Kvant/Swarm")]
     public class Swarm : MonoBehaviour
     {
-        #region Basic Configuration
+        #region Basic Settings
 
         [SerializeField]
-        int _lineCount = 32;
+        int _lineCount = 128;
 
         [SerializeField]
-        int _historyLength = 32;
+        int _historyLength = 128;
 
-        #endregion
+        [SerializeField, Range(0, 1)]
+        float _throttle = 1.0f;
 
-        #region Dynamics Parameters
-
-        [SerializeField]
-        float _minAcceleration = 0.5f;
-
-        public float minAcceleration {
-            get { return _minAcceleration; }
-            set { _minAcceleration = value; }
-        }
-
-        [SerializeField]
-        float _maxAcceleration = 1.0f;
-
-        public float maxAcceleration {
-            get { return _maxAcceleration; }
-            set { _maxAcceleration = value; }
-        }
-
-        [SerializeField]
-        float _damp = 0.5f;
-
-        public float damp {
-            get { return _damp; }
-            set { _damp = value; }
-        }
-
-        #endregion
-
-        #region External Forces
-
-        [SerializeField]
-        Vector3 _attractor = Vector3.zero;
-
-        public Vector3 attractor {
-            get { return _attractor; }
-            set { _attractor = value; }
-        }
-
-        [SerializeField]
-        float _spread = 0.2f;
-
-        public float spread {
-            get { return _spread; }
-            set { _spread = value; }
+        public float throttle {
+            get { return _throttle; }
+            set { _throttle = value; }
         }
 
         [SerializeField]
@@ -74,10 +35,62 @@ namespace Kvant
 
         #endregion
 
-        #region Noise Parameters
+        #region Attractor Parameters
 
         [SerializeField]
-        float _noiseAmplitude = 0.1f;
+        Transform _attractor;
+
+        public Transform attractor {
+            get { return _attractor; }
+            set { _attractor = value; }
+        }
+
+        [SerializeField]
+        Vector3 _attractorPosition = Vector3.zero;
+
+        public Vector3 attractorPosition {
+            get { return _attractorPosition; }
+            set { _attractorPosition = value; }
+        }
+
+        [SerializeField]
+        float _attractorRadius = 0.1f;
+
+        public float attractorRadius {
+            get { return _attractorRadius; }
+            set { _attractorRadius = value; }
+        }
+
+        [SerializeField]
+        float _forcePerDistance = 2.0f;
+
+        public float forcePerDistance {
+            get { return _forcePerDistance; }
+            set { _forcePerDistance = value; }
+        }
+
+        [SerializeField, Range(0, 1)]
+        float _forceRandomness = 0.2f;
+
+        public float forceRandomness {
+            get { return _forceRandomness; }
+            set { _forceRandomness = value; }
+        }
+
+        [SerializeField, Range(0, 6)]
+        float _drag = 2.0f;
+
+        public float drag {
+            get { return _drag; }
+            set { _drag = value; }
+        }
+
+        #endregion
+
+        #region Turbulent Noise Parameters
+
+        [SerializeField]
+        float _noiseAmplitude = 1.5f;
 
         public float noiseAmplitude {
             get { return _noiseAmplitude; }
@@ -85,7 +98,7 @@ namespace Kvant
         }
 
         [SerializeField]
-        float _noiseFrequency = 0.2f;
+        float _noiseFrequency = 0.1f;
 
         public float noiseFrequency {
             get { return _noiseFrequency; }
@@ -93,40 +106,56 @@ namespace Kvant
         }
 
         [SerializeField]
-        float _noiseSpeed = 1.0f;
+        float _noiseSpread = 0.5f;
 
-        public float noiseSpeed {
-            get { return _noiseSpeed; }
-            set { _noiseSpeed = value; }
+        public float noiseSpread {
+            get { return _noiseSpread; }
+            set { _noiseSpread = value; }
         }
 
         [SerializeField]
-        float _noiseVariance = 1.0f;
+        float _noiseMotion = 0.5f;
 
-        public float noiseVariance {
-            get { return _noiseVariance; }
-            set { _noiseVariance = value; }
+        public float noiseMotion {
+            get { return _noiseMotion; }
+            set { _noiseMotion = value; }
         }
 
         [SerializeField]
-        float _swirlStrength = 0.0f;
+        float _swirlAmplitude = 0.1f;
 
-        public float swirlStrength {
-            get { return _swirlStrength; }
-            set { _swirlStrength = value; }
+        public float swirlAmplitude {
+            get { return _swirlAmplitude; }
+            set { _swirlAmplitude = value; }
         }
 
         [SerializeField]
-        float _swirlDensity = 1.0f;
+        float _swirlFrequency = 0.15f;
 
-        public float swirlDensity {
-            get { return _swirlDensity; }
-            set { _swirlDensity = value; }
+        public float swirlFrequency {
+            get { return _swirlFrequency; }
+            set { _swirlFrequency = value; }
         }
 
         #endregion
 
         #region Render Settings
+
+        [SerializeField]
+        float _lineWidth = 0.1f;
+
+        public float lineWidth {
+            get { return _lineWidth; }
+            set { _lineWidth = value; }
+        }
+
+        [SerializeField, Range(0, 1)]
+        float _lineWidthRandomness = 0.5f;
+
+        public float lineWidthRandomness {
+            get { return _lineWidthRandomness; }
+            set { _lineWidthRandomness = value; }
+        }
 
         public enum ColorMode { Random, Smooth }
 
@@ -138,28 +167,52 @@ namespace Kvant
             set { _colorMode = value; }
         }
 
-        [SerializeField, ColorUsage(true, true, 0, 8, 0.125f, 3)]
+        [SerializeField]
         Color _color1 = Color.white;
 
-        public Color color1 {
+        public Color color {
             get { return _color1; }
             set { _color1 = value; }
         }
 
-        [SerializeField, ColorUsage(true, true, 0, 8, 0.125f, 3)]
-        Color _color2 = Color.white;
+        [SerializeField]
+        Color _color2 = Color.gray;
 
         public Color color2 {
             get { return _color2; }
             set { _color2 = value; }
         }
 
-        [SerializeField]
-        float _gradientSteepness = 2.0f;
+        [SerializeField, Range(0, 1)]
+        float _metallic = 0.5f;
 
-        public float gradientSteepness {
-            get { return _gradientSteepness; }
-            set { _gradientSteepness = value; }
+        public float metallic {
+            get { return _metallic; }
+            set { _metallic = value; }
+        }
+
+        [SerializeField, Range(0, 1)]
+        float _smoothness = 0.5f;
+
+        public float smoothness {
+            get { return _smoothness; }
+            set { _smoothness = value; }
+        }
+
+        [SerializeField]
+        ShadowCastingMode _castShadows;
+
+        public ShadowCastingMode castShadows {
+            get { return _castShadows; }
+            set { _castShadows = value; }
+        }
+
+        [SerializeField]
+        bool _receiveShadows = false;
+
+        public bool receiveShadows {
+            get { return _receiveShadows; }
+            set { _receiveShadows = value; }
         }
 
         #endregion
@@ -174,6 +227,21 @@ namespace Kvant
 
         [SerializeField]
         int _randomSeed = 0;
+
+        #endregion
+
+        #region Public Methods
+
+        public void Restart()
+        {
+            _needsReset = true;
+        }
+
+        public void Restart(int newRandomSeed)
+        {
+            _randomSeed = newRandomSeed;
+            _needsReset = true;
+        }
 
         #endregion
 
@@ -194,19 +262,19 @@ namespace Kvant
         RenderTexture _velocityBuffer2;
         Mesh _mesh;
         bool _needsReset = true;
-        float _time;
+        Vector3 _noiseOffset;
 
         // Returns how many draw calls are needed to draw all lines.
         int DrawCount {
             get {
-                var total = _historyLength * _lineCount;
-                if (total < 65000) return _lineCount;
+                var total = _historyLength * _lineCount * 2;
+                if (total < 65000) return 1;
                 return total / 65000 + 1;
             }
         }
 
         // Returns the actual total number of lines.
-        public int TotalLineCount {
+        int TotalLineCount {
             get { return _lineCount - _lineCount % DrawCount; }
         }
 
@@ -220,11 +288,6 @@ namespace Kvant
         #endregion
 
         #region Resource Management
-
-        public void NotifyConfigChange()
-        {
-            _needsReset = true;
-        }
 
         Material CreateMaterial(Shader shader)
         {
@@ -253,49 +316,55 @@ namespace Kvant
             var iny = 1.0f / TotalLineCount;
 
             // vertex and texcoord array
-            var va = new Vector3[nx * ny];
-            var ta = new Vector2[nx * ny];
+            var va = new Vector3[(nx - 2) * ny * 2];
+            var ta = new Vector2[(nx - 2) * ny * 2];
 
             var offs = 0;
             for (var y = 0; y < ny; y++)
             {
                 var v = iny * y;
-                for (var x = 0; x < nx; x++)
+                for (var x = 1; x < nx - 1; x++)
                 {
-                    va[offs] = Vector3.zero;
-                    ta[offs] = new Vector2(inx * x, v);
-                    offs++;
+                    va[offs] = Vector3.right * -0.5f;
+                    va[offs + 1] = Vector3.right * 0.5f;
+                    ta[offs] = ta[offs + 1] = new Vector2(inx * x, v);
+                    offs += 2;
                 }
             }
 
             // index array
-            var ia = new int[ny * (nx - 1) * 2];
+            var ia = new int[ny * (nx - 3) * 6];
             offs = 0;
             for (var y = 0; y < ny; y++)
             {
-                var vi = y * nx;
-                for (var x = 0; x < nx - 1; x++)
+                var vi = y * (nx - 2) * 2;
+                for (var x = 0; x < nx - 3; x++)
                 {
-                    ia[offs++] = vi++;
                     ia[offs++] = vi;
+                    ia[offs++] = vi + 1;
+                    ia[offs++] = vi + 2;
+                    ia[offs++] = vi + 1;
+                    ia[offs++] = vi + 3;
+                    ia[offs++] = vi + 2;
+                    vi += 2;
                 }
             }
 
-            // create a mesh object
+            // mesh object initialization
             var mesh = new Mesh();
             mesh.hideFlags = HideFlags.DontSave;
             mesh.vertices = va;
             mesh.uv = ta;
-            mesh.SetIndices(ia, MeshTopology.Lines, 0);
+            mesh.SetIndices(ia, MeshTopology.Triangles, 0);
             mesh.Optimize();
 
-            // avoid begin culled
+            // avoid being culled
             mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 100);
 
             return mesh;
         }
 
-        void StepKernel(float time, float deltaTime)
+        void StepKernel(float deltaTime)
         {
             // GPGPU buffer swap
             var pb = _positionBuffer1;
@@ -305,42 +374,55 @@ namespace Kvant
             _positionBuffer2 = pb;
             _velocityBuffer2 = vb;
 
-            // kernel shader parameters
+            // private state update
+            _noiseOffset += (_flow + Vector3.one * _noiseMotion) * deltaTime;
+
+            // invoking velocity update kernel
+            UpdateKernelShader(deltaTime);
+            _kernelMaterial.SetTexture("_PositionTex", _positionBuffer1);
+            _kernelMaterial.SetTexture("_VelocityTex", _velocityBuffer1);
+            Graphics.Blit(null, _velocityBuffer2, _kernelMaterial, 3);
+
+            // invoking position update kernel
+            _kernelMaterial.SetTexture("_VelocityTex", _velocityBuffer2);
+            Graphics.Blit(null, _positionBuffer2, _kernelMaterial, 2);
+        }
+
+        void UpdateKernelShader(float deltaTime)
+        {
             var m = _kernelMaterial;
-            m.SetVector("_Acceleration", new Vector2(_minAcceleration, _maxAcceleration));
-            m.SetFloat("_Damp", _damp);
-            m.SetVector("_AttractPos", _attractor);
-            m.SetFloat("_Spread", _spread);
+
             m.SetVector("_Flow", _flow);
-            m.SetVector("_NoiseParams", new Vector4(_noiseFrequency, _noiseAmplitude, _noiseSpeed, _noiseVariance));
-            m.SetVector("_SwirlParams", new Vector2(_swirlStrength, _swirlDensity));
-            m.SetFloat("_RandomSeed", _randomSeed);
-            m.SetVector("_TimeParams", new Vector2(time, deltaTime));
 
-            if (_swirlStrength > 0.0f)
-                m.EnableKeyword("ENABLE_SWIRL");
-            else
-                m.DisableKeyword("ENABLE_SWIRL");
+            var minForce = _forcePerDistance * (1 - _forceRandomness);
+            var drag = Mathf.Exp(-_drag * deltaTime);
+            m.SetVector("_Acceleration", new Vector3(minForce, _forcePerDistance, drag));
 
-            // velocity update
-            m.SetTexture("_PositionTex", _positionBuffer1);
-            m.SetTexture("_VelocityTex", _velocityBuffer1);
-            Graphics.Blit(null, _velocityBuffer2, m, 3);
+            var pos = _attractor ? _attractor.position : _attractorPosition;
+            pos = transform.InverseTransformPoint(pos);
+            m.SetVector("_Attractor", new Vector4(pos.x, pos.y, pos.z, _attractorRadius));
 
-            // position update
-            m.SetTexture("_VelocityTex", _velocityBuffer2);
-            Graphics.Blit(null, _positionBuffer2, m, 2);
+            m.SetVector("_NoiseParams", new Vector3(_noiseAmplitude, _noiseFrequency, _noiseSpread));
+            m.SetVector("_NoiseOffset", _noiseOffset);
+            m.SetVector("_SwirlParams", new Vector2(_swirlAmplitude, _swirlFrequency));
+
+            m.SetVector("_Config", new Vector2(deltaTime, _randomSeed));
         }
 
         void UpdateLineShader()
         {
             var m = _lineMaterial;
 
-            m.SetTexture("_PositionTex", _positionBuffer2);
-
             m.SetColor("_Color1", _color1);
             m.SetColor("_Color2", _color2);
-            m.SetFloat("_GradExp", _gradientSteepness);
+            m.SetFloat("_Metallic", _metallic);
+            m.SetFloat("_Smoothness", _smoothness);
+
+            m.SetVector("_LineWidth", new Vector2(1 -_lineWidthRandomness, 1) * _lineWidth);
+            m.SetFloat("_Throttle", _throttle);
+
+            m.SetTexture("_PositionTex", _positionBuffer2);
+            m.SetTexture("_VelocityTex", _velocityBuffer2);
 
             if (_colorMode == ColorMode.Smooth)
                 m.EnableKeyword("COLOR_SMOOTH");
@@ -372,12 +454,14 @@ namespace Kvant
             // shader materials
             if (!_kernelMaterial) _kernelMaterial = CreateMaterial(_kernelShader);
             if (!_lineMaterial)   _lineMaterial   = CreateMaterial(_lineShader);
+        }
 
-            // buffer initialization
-            Graphics.Blit(null, _positionBuffer1, _kernelMaterial, 0);
-            Graphics.Blit(null, _velocityBuffer1, _kernelMaterial, 1);
-
-            _needsReset = false;
+        void ResetState()
+        {
+            _noiseOffset = Vector3.one * _randomSeed;
+            UpdateKernelShader(0);
+            Graphics.Blit(null, _positionBuffer2, _kernelMaterial, 0);
+            Graphics.Blit(null, _velocityBuffer2, _kernelMaterial, 1);
         }
 
         #endregion
@@ -391,7 +475,7 @@ namespace Kvant
 
         void OnDestroy()
         {
-            if (_mesh) DestroyImmediate(_mesh);
+            if (_mesh)            DestroyImmediate(_mesh);
             if (_positionBuffer1) DestroyImmediate(_positionBuffer1);
             if (_positionBuffer2) DestroyImmediate(_positionBuffer2);
             if (_velocityBuffer1) DestroyImmediate(_velocityBuffer1);
@@ -402,7 +486,12 @@ namespace Kvant
 
         void Update()
         {
-            if (_needsReset) ResetResources();
+            if (_needsReset)
+            {
+                ResetResources();
+                ResetState();
+                _needsReset = false;
+            }
 
             if (Application.isPlaying)
             {
@@ -411,40 +500,31 @@ namespace Kvant
 
                 if (_fixTimeStep)
                 {
-                    // Fixed time step.
+                    // fixed time step
                     deltaTime = 1.0f / _stepsPerSecond;
                     steps = Mathf.RoundToInt(Time.deltaTime * _stepsPerSecond);
                 }
                 else
                 {
-                    // Variable time step.
+                    // variable time step
                     deltaTime = Time.smoothDeltaTime;
                     steps = 1;
                 }
 
-                // Time steps.
+                // time steps
                 for (var i = 0; i < steps; i++)
-                {
-                    _time += deltaTime;
-                    StepKernel(_time, deltaTime);
-                }
+                    StepKernel(deltaTime);
             }
             else
             {
-                // Reset simulation state.
-                Graphics.Blit(null, _positionBuffer2, _kernelMaterial, 0);
-                Graphics.Blit(null, _velocityBuffer2, _kernelMaterial, 1);
-                _time = 0;
+                ResetState();
 
-                // Advance for a short period of time.
+                // warming up
                 for (var i = 0; i < 32; i++)
-                {
-                    _time += 0.1f;
-                    StepKernel(_time, 0.1f);
-                }
+                    StepKernel(0.1f);
             }
 
-            // Draw lines.
+            // drawing lines
             UpdateLineShader();
 
             var matrix = transform.localToWorldMatrix;
@@ -458,7 +538,9 @@ namespace Kvant
             {
                 uv.y = (0.5f + i) / total;
                 props.SetVector("_BufferOffset", uv);
-                Graphics.DrawMesh(_mesh, matrix, _lineMaterial, 0, null, 0, props);
+                Graphics.DrawMesh(
+                    _mesh, matrix, _lineMaterial, 0, null, 0, props,
+                    _castShadows, _receiveShadows);
             }
         }
 

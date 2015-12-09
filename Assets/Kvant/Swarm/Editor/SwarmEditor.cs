@@ -11,63 +11,78 @@ namespace Kvant
     {
         SerializedProperty _lineCount;
         SerializedProperty _historyLength;
-
-        SerializedProperty _minAcceleration;
-        SerializedProperty _maxAcceleration;
-        SerializedProperty _damp;
+        SerializedProperty _throttle;
+        SerializedProperty _flow;
 
         SerializedProperty _attractor;
-        SerializedProperty _spread;
-        SerializedProperty _flow;
+        SerializedProperty _attractorPosition;
+        SerializedProperty _attractorRadius;
+        SerializedProperty _forcePerDistance;
+        SerializedProperty _forceRandomness;
+        SerializedProperty _drag;
 
         SerializedProperty _noiseAmplitude;
         SerializedProperty _noiseFrequency;
-        SerializedProperty _noiseSpeed;
-        SerializedProperty _noiseVariance;
+        SerializedProperty _noiseSpread;
+        SerializedProperty _noiseMotion;
 
-        SerializedProperty _swirlStrength;
-        SerializedProperty _swirlDensity;
+        SerializedProperty _swirlAmplitude;
+        SerializedProperty _swirlFrequency;
 
+        SerializedProperty _lineWidth;
+        SerializedProperty _lineWidthRandomness;
         SerializedProperty _colorMode;
         SerializedProperty _color1;
         SerializedProperty _color2;
-        SerializedProperty _gradientSteepness;
+        SerializedProperty _metallic;
+        SerializedProperty _smoothness;
+
+        SerializedProperty _castShadows;
+        SerializedProperty _receiveShadows;
 
         SerializedProperty _fixTimeStep;
         SerializedProperty _stepsPerSecond;
         SerializedProperty _randomSeed;
 
-        static GUIContent _textAcceleration = new GUIContent("Acceleration");
-        static GUIContent _textAmplitude    = new GUIContent("Amplitude");
-        static GUIContent _textFrequency    = new GUIContent("Frequency");
-        static GUIContent _textSpeed        = new GUIContent("Speed");
-        static GUIContent _textVariance     = new GUIContent("Variance");
+        static GUIContent _textAmplitude = new GUIContent("Amplitude");
+        static GUIContent _textFlow      = new GUIContent("Flow Vector");
+        static GUIContent _textFrequency = new GUIContent("Frequency");
+        static GUIContent _textMotion    = new GUIContent("Motion");
+        static GUIContent _textSpread    = new GUIContent("Spread");
 
         void OnEnable()
         {
             _lineCount     = serializedObject.FindProperty("_lineCount");
             _historyLength = serializedObject.FindProperty("_historyLength");
+            _throttle      = serializedObject.FindProperty("_throttle");
+            _flow          = serializedObject.FindProperty("_flow");
 
-            _minAcceleration = serializedObject.FindProperty("_minAcceleration");
-            _maxAcceleration = serializedObject.FindProperty("_maxAcceleration");
-            _damp            = serializedObject.FindProperty("_damp");
-
-            _attractor = serializedObject.FindProperty("_attractor");
-            _spread    = serializedObject.FindProperty("_spread");
-            _flow      = serializedObject.FindProperty("_flow");
+            _attractor         = serializedObject.FindProperty("_attractor");
+            _attractorPosition = serializedObject.FindProperty("_attractorPosition");
+            _attractorRadius   = serializedObject.FindProperty("_attractorRadius");
+            _forcePerDistance  = serializedObject.FindProperty("_forcePerDistance");
+            _forceRandomness   = serializedObject.FindProperty("_forceRandomness");
+            _drag              = serializedObject.FindProperty("_drag");
 
             _noiseAmplitude = serializedObject.FindProperty("_noiseAmplitude");
             _noiseFrequency = serializedObject.FindProperty("_noiseFrequency");
-            _noiseSpeed     = serializedObject.FindProperty("_noiseSpeed");
-            _noiseVariance  = serializedObject.FindProperty("_noiseVariance");
+            _noiseSpread    = serializedObject.FindProperty("_noiseSpread");
+            _noiseMotion    = serializedObject.FindProperty("_noiseMotion");
 
-            _swirlStrength = serializedObject.FindProperty("_swirlStrength");
-            _swirlDensity  = serializedObject.FindProperty("_swirlDensity");
+            _swirlAmplitude = serializedObject.FindProperty("_swirlAmplitude");
+            _swirlFrequency = serializedObject.FindProperty("_swirlFrequency");
 
-            _colorMode = serializedObject.FindProperty("_colorMode");
-            _color1    = serializedObject.FindProperty("_color1");
-            _color2    = serializedObject.FindProperty("_color2");
-            _gradientSteepness = serializedObject.FindProperty("_gradientSteepness");
+            _lineWidth           = serializedObject.FindProperty("_lineWidth");
+            _lineWidthRandomness = serializedObject.FindProperty("_lineWidthRandomness");
+
+            _colorMode  = serializedObject.FindProperty("_colorMode");
+            _color1     = serializedObject.FindProperty("_color1");
+            _color2     = serializedObject.FindProperty("_color2");
+            _metallic   = serializedObject.FindProperty("_metallic");
+            _smoothness = serializedObject.FindProperty("_smoothness");
+
+            _castShadows    = serializedObject.FindProperty("_castShadows");
+            _receiveShadows = serializedObject.FindProperty("_receiveShadows");
 
             _fixTimeStep    = serializedObject.FindProperty("_fixTimeStep");
             _stepsPerSecond = serializedObject.FindProperty("_stepsPerSecond");
@@ -85,91 +100,66 @@ namespace Kvant
             EditorGUILayout.PropertyField(_lineCount);
             EditorGUILayout.PropertyField(_historyLength);
 
-            if (EditorGUI.EndChangeCheck()) instance.NotifyConfigChange();
+            if (EditorGUI.EndChangeCheck()) instance.Restart();
+
+            EditorGUILayout.PropertyField(_throttle);
+            EditorGUILayout.PropertyField(_flow, _textFlow);
 
             EditorGUILayout.Space();
 
             EditorGUILayout.LabelField("Dynamics", EditorStyles.boldLabel);
-            MinMaxSlider(_textAcceleration, _minAcceleration, _maxAcceleration, 0.01f, 10.0f);
-            EditorGUILayout.Slider(_damp, 0, 5);
-
-            EditorGUILayout.Space();
-
-            EditorGUILayout.LabelField("External Forces", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(_attractor);
-            EditorGUILayout.Slider(_spread, 0, 5);
-            EditorGUILayout.PropertyField(_flow);
+            if (_attractor.hasMultipleDifferentValues ||
+                _attractor.objectReferenceValue == null)
+                EditorGUILayout.PropertyField(_attractorPosition);
+            EditorGUILayout.PropertyField(_attractorRadius);
+            EditorGUILayout.PropertyField(_forcePerDistance);
+            EditorGUILayout.PropertyField(_forceRandomness);
+            EditorGUILayout.PropertyField(_drag);
 
             EditorGUILayout.Space();
 
             EditorGUILayout.LabelField("Turbulent Noise", EditorStyles.boldLabel);
-            EditorGUILayout.Slider(_noiseAmplitude, 0.0f, 10.0f, _textAmplitude);
-            EditorGUILayout.Slider(_noiseFrequency, 0.01f, 1.0f, _textFrequency);
-            EditorGUILayout.Slider(_noiseSpeed, 0.0f, 5.0f, _textSpeed);
-            EditorGUILayout.Slider(_noiseVariance, 0.0f, 10.0f, _textVariance);
+            EditorGUILayout.PropertyField(_noiseAmplitude, _textAmplitude);
+            EditorGUILayout.PropertyField(_noiseFrequency, _textFrequency);
+            EditorGUILayout.PropertyField(_noiseSpread, _textSpread);
+            EditorGUILayout.PropertyField(_noiseMotion, _textMotion);
 
             EditorGUILayout.Space();
 
-            EditorGUILayout.Slider(_swirlStrength, 0.0f, 2.0f);
-            EditorGUILayout.Slider(_swirlDensity, 0.01f, 5.0f);
+            EditorGUILayout.PropertyField(_swirlAmplitude);
+            EditorGUILayout.PropertyField(_swirlFrequency);
 
             EditorGUILayout.Space();
 
             EditorGUILayout.LabelField("Render Settings", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(_lineWidth);
+            EditorGUILayout.PropertyField(_lineWidthRandomness);
+
+            EditorGUILayout.Space();
+
             EditorGUILayout.PropertyField(_colorMode);
             EditorGUILayout.PropertyField(_color1);
             EditorGUILayout.PropertyField(_color2);
-            EditorGUILayout.Slider(_gradientSteepness, 1, 10);
+            EditorGUILayout.Slider(_metallic, 0, 1);
+            EditorGUILayout.Slider(_smoothness, 0, 1);
+
+            EditorGUILayout.Space();
+
+            EditorGUILayout.PropertyField(_castShadows);
+            EditorGUILayout.PropertyField(_receiveShadows);
 
             EditorGUILayout.Space();
 
             EditorGUILayout.PropertyField(_fixTimeStep);
             if (_fixTimeStep.hasMultipleDifferentValues || _fixTimeStep.boolValue)
                 EditorGUILayout.PropertyField(_stepsPerSecond);
-            EditorGUILayout.PropertyField(_randomSeed);
-
-            serializedObject.ApplyModifiedProperties();
-        }
-
-        void MinMaxSlider(GUIContent label, SerializedProperty propMin, SerializedProperty propMax, float minLimit, float maxLimit)
-        {
-            var min = propMin.floatValue;
-            var max = propMax.floatValue;
 
             EditorGUI.BeginChangeCheck();
+            EditorGUILayout.PropertyField(_randomSeed);
+            if (EditorGUI.EndChangeCheck()) instance.Restart();
 
-            // Min-max slider.
-            EditorGUILayout.MinMaxSlider(label, ref min, ref max, minLimit, maxLimit);
-
-            var prevIndent = EditorGUI.indentLevel;
-            EditorGUI.indentLevel = 0;
-
-            // Float value boxes.
-            var rect = EditorGUILayout.GetControlRect();
-            rect.x += EditorGUIUtility.labelWidth;
-            rect.width = (rect.width - EditorGUIUtility.labelWidth) / 2 - 2;
-
-            if (EditorGUIUtility.wideMode)
-            {
-                EditorGUIUtility.labelWidth = 28;
-                min = Mathf.Clamp(EditorGUI.FloatField(rect, "min", min), minLimit, max);
-                rect.x += rect.width + 4;
-                max = Mathf.Clamp(EditorGUI.FloatField(rect, "max", max), min, maxLimit);
-                EditorGUIUtility.labelWidth = 0;
-            }
-            else
-            {
-                min = Mathf.Clamp(EditorGUI.FloatField(rect, min), minLimit, max);
-                rect.x += rect.width + 4;
-                max = Mathf.Clamp(EditorGUI.FloatField(rect, max), min, maxLimit);
-            }
-
-            EditorGUI.indentLevel = prevIndent;
-
-            if (EditorGUI.EndChangeCheck()) {
-                propMin.floatValue = min;
-                propMax.floatValue = max;
-            }
+            serializedObject.ApplyModifiedProperties();
         }
     }
 }

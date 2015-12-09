@@ -1,31 +1,36 @@
-KvantSwarm
-==========
+Kvant/Swarm v2
+==============
 
-KvantSwam is a custom renderer for Unity, which was initially made as a GPU
-accelerated swarm behavior simulation. Though the initial goal was not met,
-I noticed that its organic and chaotic behavior can be used to make a
-beautiful eye-candy.
+*Swarm* is a specialized renderer/animator that draws organic flowing lines with
+a physically based shader. It fully utilizes GPU to process flowing animation
+and mesh deformation, and thus it can draw very large number of lines without
+consuming precious CPU time.
 
-![screenshot](https://40.media.tumblr.com/bb322993f5302cadbbcc592814084c3b/tumblr_ns5l0dhXeS1qio469o1_400.png)
-![gif](http://33.media.tumblr.com/8ff4a0660a1eaaba3c3bae185f8aa6fb/tumblr_ns5knxUlUL1qio469o1_400.gif)
+![gif](http://45.media.tumblr.com/65956e640f88d08da86ae7b238eb9889/tumblr_nz32r08PoG1qio469o1_400.gif)
+![gif](http://49.media.tumblr.com/6d2ddb78263867686bd1f7e9934eaf42/tumblr_nz32r08PoG1qio469o2_400.gif)
 
-![screenshot](http://41.media.tumblr.com/11c9e90cc322a00b3a07310e698ac0b2/tumblr_nrw65sbPnV1qio469o1_400.png)
-![screenshot](http://40.media.tumblr.com/1167cd3c10386ff573bff8043b7be6bb/tumblr_nrw65sbPnV1qio469o2_400.png)
-![screenshot](http://41.media.tumblr.com/462f5a6595ff3148711dd57bcc3cc3bc/tumblr_nrw65sbPnV1qio469o3_400.png)
-![screenshot](http://41.media.tumblr.com/44a85e56644b01772696cad16755539f/tumblr_nrw65sbPnV1qio469o4_400.png)
+![gif](http://49.media.tumblr.com/adb02e99da464a69137c407f2b9a9cff/tumblr_nz32rxg18E1qio469o1_400.gif)
+![gif](http://49.media.tumblr.com/b60a64d4815d6bda1221afbf4598be92/tumblr_nz32rxg18E1qio469o2_400.gif)
 
-[Video (1)](https://vimeo.com/134624419), [Video (2)](https://vimeo.com/134149333)
+*Swarm* is part of the *Kvant* effect suite. Please see the [GitHub
+repositories][kvant] for further information about the suite.
+
+[kvant]: https://github.com/search?q=kvant+user%3Akeijiro&type=Repositories
 
 System Requirements
 -------------------
 
 Unity 5.1 or later versions.
 
-Compatibility
--------------
+*Kvant* effects require floating-point HDR textures to store animation state.
+Most of mobile devices don't fulfill this requirement at the moment.
 
-KvantSwarm needs a 4-component floating-point texture format. Basically, it
-means it runs only on desktop/laptop-class GPUs.
+No Backward Compatibility
+-------------------------
+
+This version (v2) is not compatible with the previous versions. You can't simply
+upgrade the previous implementation or use two different versions in the same
+project. Sorry for the inconvenience!
 
 License
 -------

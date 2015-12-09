@@ -1,13 +1,13 @@
 //
 // GPGPU kernels for Swarm
 //
-// Texture format:
+// Position buffer format:
+// .xyz = particle position
+// .w   = random number
 //
-// _PositionTex.xyz = position
-// _PositionTex.w   = random number
-//
-// _VelocityTex.xyz = velocity vector
-// _VelocityTex.w   = 0
+// Velocity buffer format:
+// .xyz = particle velocity
+// .w   = 0
 //
 Shader "Hidden/Kvant/Swarm/Kernel"
 {
@@ -19,106 +19,99 @@ Shader "Hidden/Kvant/Swarm/Kernel"
 
     CGINCLUDE
 
-    #pragma multi_compile _ ENABLE_SWIRL
-
     #include "UnityCG.cginc"
-    #include "ClassicNoise3D.cginc"
+    #include "SimplexNoiseGrad3D.cginc"
 
     sampler2D _PositionTex;
     sampler2D _VelocityTex;
     float4 _PositionTex_TexelSize;
     float4 _VelocityTex_TexelSize;
 
-    float2 _Acceleration; // (min, max)
-    float _Damp;
-    float3 _AttractPos;
-    float _Spread;
+    float3 _Acceleration;   // min, max, drag
+    float4 _Attractor;      // x, y, z, spread
     float3 _Flow;
-    float4 _NoiseParams; // (frequency, amplitude, animation, variance)
-    float2 _SwirlParams; // (strength, density)
-    float _RandomSeed;
-    float2 _TimeParams; // (current, delta)
+    float3 _NoiseParams;    // amplitude, frequency, spread
+    float3 _NoiseOffset;
+    float2 _SwirlParams;    // amplitude, frequency
+    float2 _Config;         // deltaTime, randomSeed
 
-    // Pseudo random number generator
+    // pseudo random number generator
     float nrand(float2 uv, float salt)
     {
-        uv += float2(salt, _RandomSeed);
+        uv += float2(salt, _Config.y);
         return frac(sin(dot(uv, float2(12.9898, 78.233))) * 43758.5453);
     }
 
-    // Position dependant force field
-    float3 position_force(float3 p, float2 uv)
+    // divergence-free noise vector field
+    float3 dfnoise_field(float3 p, float k)
     {
-        p = p * _NoiseParams.x + _TimeParams.x * _NoiseParams.z + _RandomSeed;
-        float3 uvc = float3(uv, 7.919) * _NoiseParams.w;
-        float nx = cnoise(p + uvc.xyz);
-        float ny = cnoise(p + uvc.yzx);
-        float nz = cnoise(p + uvc.zxy);
-        return float3(nx, ny, nz) * _NoiseParams.y;
+        p += float3(0.9, 1.0, 1.1) * k * _NoiseParams.z;
+        float3 n1 = snoise_grad(p);
+        float3 n2 = snoise_grad(p + float3(15.3, 13.1, 17.4));
+        return cross(n1, n2);
     }
 
-    // Attractor position
+    // attractor position with spread parameter
     float3 attract_point(float2 uv)
     {
         float3 r = float3(nrand(uv, 0), nrand(uv, 1), nrand(uv, 2));
-        return _AttractPos + (r - (float3)0.5) * _Spread;
+        return _Attractor.xyz + (r - 0.5) * _Attractor.w;
     }
 
-    // Pass 0: position initialization
-    float4 frag_init_position(v2f_img i) : SV_Target 
+    // pass 0: position initialization
+    float4 frag_init_position(v2f_img i) : SV_Target
     {
-        return float4(0, 0, 0, nrand(i.uv.yy, 3));
+        return float4(attract_point(i.uv.y + 2), nrand(i.uv.y, 6));
     }
 
-    // Pass 1: velocity initialization
-    float4 frag_init_velocity(v2f_img i) : SV_Target 
+    // pass 1: velocity initialization
+    float4 frag_init_velocity(v2f_img i) : SV_Target
     {
         return (float4)0;
     }
 
-    // Pass 2: position update
-    float4 frag_update_position(v2f_img i) : SV_Target 
+    // pass 2: position update
+    float4 frag_update_position(v2f_img i) : SV_Target
     {
-        // Fetch the current position (u=0) or the previous position (u>0).
+        // u=0: p <- head position
+        // u>0: p <- one newer entry in the history array
         float2 uv_prev = float2(_PositionTex_TexelSize.x, 0);
         float4 p = tex2D(_PositionTex, i.uv - uv_prev);
 
-        // Fetch the velocity vector.
-        float3 v = tex2D(_VelocityTex, i.uv).xyz;
+        // velocity vector for the head point (u=0)
+        float3 v0 = tex2D(_VelocityTex, i.uv).xyz;
 
-        // Use the flow vector or add swirl vector.
-        float3 flow = _Flow;
-#if ENABLE_SWIRL
-        flow += position_force(p.xyz * _SwirlParams.y, i.uv) * _SwirlParams.x;
-#endif
-        // Add the velocity (u=0) or the flow vector (u>0).
+        // velocity vector for the tail points (u>0)
+        float3 np = (p.xyz + _NoiseOffset) * _SwirlParams.y;
+        float3 v1 = _Flow + dfnoise_field(np, i.uv.y) * _SwirlParams.x;
+
+        // applying the velocity vector
         float u_0 = i.uv.x < _PositionTex_TexelSize.x;
-        p.xyz += lerp(flow, v, u_0) * _TimeParams.y;
+        p.xyz += lerp(v1, v0, u_0) * _Config.x;
 
         return p;
     }
 
-    // Pass 3: velocity update
-    float4 frag_update_velocity(v2f_img i) : SV_Target 
+    // pass 3: velocity update
+    float4 frag_update_velocity(v2f_img i) : SV_Target
     {
-        // Only needs the leftmost pixel.
+        // only needs the leftmost pixel
         float2 uv = i.uv * float2(0, 1);
 
-        // Fetch the current position/velocity.
+        // head point position/velocity
         float3 p = tex2D(_PositionTex, uv).xyz;
         float3 v = tex2D(_VelocityTex, uv).xyz;
 
-        // Acceleration scale factor
-        float acs = lerp(_Acceleration.x, _Acceleration.y, nrand(uv, 4));
+        // force from the attactor
+        float accel = lerp(_Acceleration.x, _Acceleration.y, nrand(uv, 7));
+        float3 fa = (attract_point(uv) - p) * accel;
 
-        // Acceleration force
-        float3 acf = attract_point(i.uv) - p + position_force(p, uv);
+        // force from the noise vector field
+        float3 np = (p + _NoiseOffset) * _NoiseParams.y;
+        float3 fn = dfnoise_field(np, uv.y) * _NoiseParams.x;
 
-        // Damping
-        v *= (1.0 - _Damp * _TimeParams.y);
-
-        // Acceleration
-        v += acs * acf * _TimeParams.y;
+        // applying drag and acceleration force
+        v = v * _Acceleration.z + (fa + fn) * _Config.x;
 
         return float4(v, 0);
     }

@@ -1,5 +1,5 @@
 ﻿//
-// Deferred AO - G-buffer based SSAO effect
+// Deferred AO - SSAO image effect for deferred shading
 //
 // Copyright (C) 2015 Keijiro Takahashi
 //
@@ -42,15 +42,29 @@ public class DeferredAOEditor : Editor
         _sampleCount = serializedObject.FindProperty("_sampleCount");
     }
 
+    bool CheckDisabled()
+    {
+        var cam = ((DeferredAO)target).GetComponent<Camera>();
+        return cam.actualRenderingPath != RenderingPath.DeferredShading;
+    }
+
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
 
-        EditorGUILayout.PropertyField(_intensity);
-        EditorGUILayout.PropertyField(_sampleRadius);
-        EditorGUILayout.PropertyField(_rangeCheck);
-        EditorGUILayout.PropertyField(_fallOffDistance);
-        EditorGUILayout.PropertyField(_sampleCount);
+        if (CheckDisabled())
+        {
+            var text = "To enable the effect, change Rendering Path to Deferred.";
+            EditorGUILayout.HelpBox(text, MessageType.Warning);
+        }
+        else
+        {
+            EditorGUILayout.PropertyField(_intensity);
+            EditorGUILayout.PropertyField(_sampleRadius);
+            EditorGUILayout.PropertyField(_rangeCheck);
+            EditorGUILayout.PropertyField(_fallOffDistance);
+            EditorGUILayout.PropertyField(_sampleCount);
+        }
 
         serializedObject.ApplyModifiedProperties();
     }
