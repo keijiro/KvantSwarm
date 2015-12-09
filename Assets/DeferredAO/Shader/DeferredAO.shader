@@ -1,5 +1,5 @@
 ﻿//
-// Deferred AO - G-buffer based SSAO effect
+// Deferred AO - SSAO image effect for deferred shading
 //
 // Copyright (C) 2015 Keijiro Takahashi
 //
@@ -90,7 +90,8 @@ Shader "Hidden/DeferredAO"
 
         // Reconstruct the view-space position.
         float2 p11_22 = float2(unity_CameraProjection._11, unity_CameraProjection._22);
-        float3 pos_o = float3((i.uv * 2 - 1) / p11_22, 1) * depth_o;
+        float2 p13_31 = float2(unity_CameraProjection._13, unity_CameraProjection._23);
+        float3 pos_o = float3((i.uv * 2 - 1 - p13_31) / p11_22, 1) * depth_o;
 
         float3x3 proj = (float3x3)unity_CameraProjection;
 
@@ -115,9 +116,9 @@ Shader "Hidden/DeferredAO"
             // Occlusion test.
             float dist = pos_s.z - depth_s;
             #if _RANGE_CHECK
-            occ += (dist > 0.1) * (dist < _Radius);
+            occ += (dist > 0.01 * _Radius) * (dist < _Radius);
             #else
-            occ += (dist > 0.1);
+            occ += (dist > 0.01 * _Radius);
             #endif
         }
 
