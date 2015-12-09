@@ -38,19 +38,27 @@ namespace Kvant
         #region Attractor Parameters
 
         [SerializeField]
-        Vector3 _attractor = Vector3.zero;
+        Transform _attractor;
 
-        public Vector3 attractor {
+        public Transform attractor {
             get { return _attractor; }
             set { _attractor = value; }
         }
 
         [SerializeField]
-        float _spread = 0.1f;
+        Vector3 _attractorPosition = Vector3.zero;
 
-        public float spread {
-            get { return _spread; }
-            set { _spread = value; }
+        public Vector3 attractorPosition {
+            get { return _attractorPosition; }
+            set { _attractorPosition = value; }
+        }
+
+        [SerializeField]
+        float _attractorRadius = 0.1f;
+
+        public float attractorRadius {
+            get { return _attractorRadius; }
+            set { _attractorRadius = value; }
         }
 
         [SerializeField]
@@ -389,7 +397,10 @@ namespace Kvant
             var minForce = _forcePerDistance * (1 - _forceRandomness);
             var drag = Mathf.Exp(-_drag * deltaTime);
             m.SetVector("_Acceleration", new Vector3(minForce, _forcePerDistance, drag));
-            m.SetVector("_Attractor", new Vector4(_attractor.x, _attractor.y, _attractor.z, _spread));
+
+            var pos = _attractor ? _attractor.position : _attractorPosition;
+            pos = transform.InverseTransformPoint(pos);
+            m.SetVector("_Attractor", new Vector4(pos.x, pos.y, pos.z, _attractorRadius));
 
             m.SetVector("_NoiseParams", new Vector3(_noiseAmplitude, _noiseFrequency, _noiseSpread));
             m.SetVector("_NoiseOffset", _noiseOffset);

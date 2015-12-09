@@ -15,7 +15,8 @@ namespace Kvant
         SerializedProperty _flow;
 
         SerializedProperty _attractor;
-        SerializedProperty _spread;
+        SerializedProperty _attractorPosition;
+        SerializedProperty _attractorRadius;
         SerializedProperty _forcePerDistance;
         SerializedProperty _forceRandomness;
         SerializedProperty _drag;
@@ -44,7 +45,6 @@ namespace Kvant
         SerializedProperty _randomSeed;
 
         static GUIContent _textAmplitude = new GUIContent("Amplitude");
-        static GUIContent _textAttractor = new GUIContent("Attractor Position");
         static GUIContent _textFlow      = new GUIContent("Flow Vector");
         static GUIContent _textFrequency = new GUIContent("Frequency");
         static GUIContent _textMotion    = new GUIContent("Motion");
@@ -57,11 +57,12 @@ namespace Kvant
             _throttle      = serializedObject.FindProperty("_throttle");
             _flow          = serializedObject.FindProperty("_flow");
 
-            _attractor        = serializedObject.FindProperty("_attractor");
-            _spread           = serializedObject.FindProperty("_spread");
-            _forcePerDistance = serializedObject.FindProperty("_forcePerDistance");
-            _forceRandomness  = serializedObject.FindProperty("_forceRandomness");
-            _drag             = serializedObject.FindProperty("_drag");
+            _attractor         = serializedObject.FindProperty("_attractor");
+            _attractorPosition = serializedObject.FindProperty("_attractorPosition");
+            _attractorRadius   = serializedObject.FindProperty("_attractorRadius");
+            _forcePerDistance  = serializedObject.FindProperty("_forcePerDistance");
+            _forceRandomness   = serializedObject.FindProperty("_forceRandomness");
+            _drag              = serializedObject.FindProperty("_drag");
 
             _noiseAmplitude = serializedObject.FindProperty("_noiseAmplitude");
             _noiseFrequency = serializedObject.FindProperty("_noiseFrequency");
@@ -106,9 +107,12 @@ namespace Kvant
 
             EditorGUILayout.Space();
 
-            EditorGUILayout.LabelField("Attractor", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(_attractor, _textAttractor);
-            EditorGUILayout.PropertyField(_spread);
+            EditorGUILayout.LabelField("Dynamics", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(_attractor);
+            if (_attractor.hasMultipleDifferentValues ||
+                _attractor.objectReferenceValue == null)
+                EditorGUILayout.PropertyField(_attractorPosition);
+            EditorGUILayout.PropertyField(_attractorRadius);
             EditorGUILayout.PropertyField(_forcePerDistance);
             EditorGUILayout.PropertyField(_forceRandomness);
             EditorGUILayout.PropertyField(_drag);
