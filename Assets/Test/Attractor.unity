@@ -336,7 +336,7 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 530349849}
-  m_LocalRotation: {x: .154558346, y: -.828216136, z: .277117252, w: .461926192}
+  m_LocalRotation: {x: .146446586, y: -.853553474, z: .353553444, w: .353553295}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
@@ -375,13 +375,13 @@ MonoBehaviour:
   _flow: {x: 0, y: 0, z: 0}
   _attractor: {fileID: 0}
   _attractorPosition: {x: 0, y: 0, z: 0}
-  _attractorRadius: .100000001
+  _attractorRadius: 0
   _forcePerDistance: 2
-  _forceRandomness: .200000003
+  _forceRandomness: .150000006
   _drag: 2
   _noiseAmplitude: 2
   _noiseFrequency: .100000001
-  _noiseSpread: .400000006
+  _noiseSpread: .300000012
   _noiseMotion: 1
   _swirlAmplitude: .0599999987
   _swirlFrequency: .119999997
@@ -396,7 +396,7 @@ MonoBehaviour:
   _receiveShadows: 1
   _fixTimeStep: 1
   _stepsPerSecond: 60
-  _randomSeed: 0
+  _randomSeed: 300
   _kernelShader: {fileID: 4800000, guid: ab176efa7135a4f038c7b318a0b3c9ef, type: 3}
   _lineShader: {fileID: 4800000, guid: ebdc691e18a6342eeac2c370efde4a89, type: 3}
 --- !u!4 &1377882079

@@ -40,7 +40,7 @@ Material:
         first:
           name: _Tex
         second:
-          m_Texture: {fileID: 8900000, guid: 95860aec4e04d460da6f1f3f70937fde, type: 3}
+          m_Texture: {fileID: 8900000, guid: 35ac38fcbb20240b9aa4af1a593245d6, type: 3}
           m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
       data:
@@ -153,7 +153,7 @@ Material:
       data:
         first:
           name: _Rotation
-        second: 0
+        second: 251
     m_Colors:
       data:
         first:
