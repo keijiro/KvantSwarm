@@ -9,7 +9,7 @@ namespace Kvant
     [ExecuteInEditMode, AddComponentMenu("Kvant/Swarm")]
     public class Swarm : MonoBehaviour
     {
-        #region Basic Configuration
+        #region Basic Settings
 
         [SerializeField]
         int _lineCount = 32;
@@ -71,7 +71,7 @@ namespace Kvant
 
         #endregion
 
-        #region Noise Parameters
+        #region Turbulent Noise Parameters
 
         [SerializeField]
         float _noiseAmplitude = 0.1f;
@@ -224,7 +224,6 @@ namespace Kvant
         Mesh _mesh;
         bool _needsReset = true;
         Vector3 _noiseOffset;
-        float _time;
 
         // Returns how many draw calls are needed to draw all lines.
         int DrawCount {
@@ -236,7 +235,7 @@ namespace Kvant
         }
 
         // Returns the actual total number of lines.
-        public int TotalLineCount {
+        int TotalLineCount {
             get { return _lineCount - _lineCount % DrawCount; }
         }
 
@@ -317,7 +316,7 @@ namespace Kvant
                 }
             }
 
-            // create a mesh object
+            // mesh object initialization
             var mesh = new Mesh();
             mesh.hideFlags = HideFlags.DontSave;
             mesh.vertices = va;
@@ -325,13 +324,13 @@ namespace Kvant
             mesh.SetIndices(ia, MeshTopology.Triangles, 0);
             mesh.Optimize();
 
-            // avoid begin culled
+            // avoid being culled
             mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 100);
 
             return mesh;
         }
 
-        void StepKernel(float time, float deltaTime)
+        void StepKernel(float deltaTime)
         {
             // GPGPU buffer swap
             var pb = _positionBuffer1;
@@ -342,32 +341,26 @@ namespace Kvant
             _velocityBuffer2 = vb;
 
             // private state update
-            _time += deltaTime;
-            _noiseOffset += _flow * deltaTime;
-            _noiseOffset += Vector3.one * _noiseMotion * deltaTime;
+            _noiseOffset += (_flow + Vector3.one * _noiseMotion) * deltaTime;
 
             // kernel shader parameters
             var m = _kernelMaterial;
-
-            m.SetVector("_Flow", _flow);
-
             var minForce = _forcePerDistance * (1 - _forceRandomness);
             var drag = Mathf.Exp(-_drag * deltaTime);
+            m.SetVector("_Flow", _flow);
             m.SetVector("_Acceleration", new Vector3(minForce, _forcePerDistance, drag));
             m.SetVector("_Attractor", new Vector4(_attractor.x, _attractor.y, _attractor.z, _spread));
-
             m.SetVector("_NoiseParams", new Vector3(_noiseAmplitude, _noiseFrequency, _noiseSpread));
             m.SetVector("_NoiseOffset", _noiseOffset);
             m.SetVector("_SwirlParams", new Vector2(_swirlAmplitude, _swirlFrequency));
+            m.SetVector("_Config", new Vector2(deltaTime, _randomSeed));
 
-            m.SetVector("_Config", new Vector3(time, deltaTime, _randomSeed));
-
-            // velocity update
+            // invoking velocity update kernel
             m.SetTexture("_PositionTex", _positionBuffer1);
             m.SetTexture("_VelocityTex", _velocityBuffer1);
             Graphics.Blit(null, _velocityBuffer2, m, 3);
 
-            // position update
+            // invoking position update kernel
             m.SetTexture("_VelocityTex", _velocityBuffer2);
             Graphics.Blit(null, _positionBuffer2, m, 2);
         }
@@ -420,8 +413,6 @@ namespace Kvant
         void ResetState()
         {
             _noiseOffset = Vector3.one * _randomSeed;
-            _time = 0;
-
             Graphics.Blit(null, _positionBuffer2, _kernelMaterial, 0);
             Graphics.Blit(null, _velocityBuffer2, _kernelMaterial, 1);
         }
@@ -437,7 +428,7 @@ namespace Kvant
 
         void OnDestroy()
         {
-            if (_mesh) DestroyImmediate(_mesh);
+            if (_mesh)            DestroyImmediate(_mesh);
             if (_positionBuffer1) DestroyImmediate(_positionBuffer1);
             if (_positionBuffer2) DestroyImmediate(_positionBuffer2);
             if (_velocityBuffer1) DestroyImmediate(_velocityBuffer1);
@@ -462,31 +453,31 @@ namespace Kvant
 
                 if (_fixTimeStep)
                 {
-                    // Fixed time step.
+                    // fixed time step
                     deltaTime = 1.0f / _stepsPerSecond;
                     steps = Mathf.RoundToInt(Time.deltaTime * _stepsPerSecond);
                 }
                 else
                 {
-                    // Variable time step.
+                    // variable time step
                     deltaTime = Time.smoothDeltaTime;
                     steps = 1;
                 }
 
-                // Time steps.
+                // time steps
                 for (var i = 0; i < steps; i++)
-                    StepKernel(_time, deltaTime);
+                    StepKernel(deltaTime);
             }
             else
             {
                 ResetState();
 
-                // Advance for a short period of time.
+                // warming up
                 for (var i = 0; i < 32; i++)
-                    StepKernel(_time, 0.1f);
+                    StepKernel(0.1f);
             }
 
-            // Draw lines.
+            // drawing lines
             UpdateLineShader();
 
             var matrix = transform.localToWorldMatrix;
