@@ -538,9 +538,20 @@ namespace Kvant
             {
                 uv.y = (0.5f + i) / total;
                 props.SetVector("_BufferOffset", uv);
+
+                // front face
+                props.SetFloat("_Flip", 1);
                 Graphics.DrawMesh(
-                    _mesh, matrix, _lineMaterial, 0, null, 0, props,
-                    _castShadows, _receiveShadows);
+                    _mesh, matrix, _lineMaterial, gameObject.layer,
+                    null, 0, props, _castShadows, _receiveShadows
+                );
+
+                // back face
+                props.SetFloat("_Flip", -1);
+                Graphics.DrawMesh(
+                    _mesh, matrix, _lineMaterial, gameObject.layer,
+                    null, 0, props, _castShadows, _receiveShadows
+                );
             }
         }
 
