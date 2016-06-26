@@ -1,4 +1,4 @@
-﻿//
+//
 // Surface shader for Swarm
 //
 // Texture format:
